@@ -221,9 +221,9 @@
         
         if(s < 0.12) { fd = 0; msg = "MISS"; sonar(150,'sine'); }
         else {
-            let mult = Math.random() * (1.3 - 0.8) + 0.8;
-            fd = Math.floor((db + (user.lvl * 35)) * mult); // Ajustado a 35 para reto real
-            if(s > 0.90) { fd *= 2; msg = "CRÍTICO"; sonar(800,'sawtooth'); }
+            let mult = Math.random() * (1.2 - 0.8) + 0.8;
+            fd = Math.floor((db + (user.lvl * 20)) * mult); // Daño equilibrado
+            if(s > 0.90) { fd = Math.floor(fd * 1.5); msg = "CRÍTICO"; sonar(800,'sawtooth'); }
             else { msg = "HIT"; sonar(400,'triangle'); }
         }
 
@@ -235,8 +235,13 @@
             setTimeout(() => {
                 let botLuck = Math.random();
                 let dmgBot = 0; let botMsg = "HIT";
-                dmgBot = Math.floor((120 + (user.lvl * 55)) * (Math.random() + 0.6));
-                if(botLuck > 0.88) { dmgBot *= 1.8; botMsg = "CRÍTICO BOT"; }
+
+                // BALANCEO PROPORCIONAL: El bot quita entre 12% y 18% de TU vida máxima.
+                // Esto escala automáticamente si tienes 220 o 200,000 de vida.
+                let basePorcentaje = (Math.random() * (0.18 - 0.12) + 0.12);
+                dmgBot = Math.floor(user.hpMax * basePorcentaje);
+
+                if(botLuck > 0.90) { dmgBot = Math.floor(dmgBot * 1.5); botMsg = "CRÍTICO BOT"; }
                 if(botLuck < 0.10) { dmgBot = 0; botMsg = "BOT MISS"; }
                 
                 miHPBot -= dmgBot;
@@ -247,7 +252,7 @@
                     document.getElementById('turno-txt').innerText = "TU TURNO";
                     document.getElementById('spell-menu').style.opacity = "1";
                 }
-            }, 1200);
+            }, 1100);
         } else {
             const r = await fetch(`${DB_BASE}/salas/${salaId}.json`); const d = await r.json();
             const target = miRol === 'p1' ? 'p2_hp' : 'p1_hp';
@@ -267,13 +272,13 @@
 
     function dueloBot() {
         esBot = true; miRol = "p1"; miTurno = true;
-        // El Bot ahora tiene MUCHA más vida proporcional a tu nivel
-        botMaxHP = user.hpMax + (user.lvl * 2500); 
+        // El Bot tiene un 25% más de vida que tú para ser un jefe, pero no imposible.
+        botMaxHP = Math.floor(user.hpMax * 1.25); 
         botHP = botMaxHP;
         miHPBot = user.hpMax;
         cambiarPantalla('duelo');
         document.getElementById('mi-nombre-display').innerText = user.nombre;
-        document.getElementById('en-nombre-display').innerText = "MAESTRO BOT (ELITE)";
+        document.getElementById('en-nombre-display').innerText = "BOT MAESTRO";
         document.getElementById('turno-txt').innerText = "TU TURNO";
         actualizarBarrasBot(); 
         const m = document.getElementById('spell-menu'); m.innerHTML = "";
@@ -286,8 +291,8 @@
     function actualizarBarrasBot() {
         document.getElementById('hp-mi-fill').style.width = (miHPBot/user.hpMax*100) + "%";
         document.getElementById('hp-en-fill').style.width = (botHP/botMaxHP*100) + "%";
-        document.getElementById('hp-mi-text').innerText = `${Math.floor(miHPBot)}`;
-        document.getElementById('hp-en-text').innerText = `${Math.floor(botHP)}`;
+        document.getElementById('hp-mi-text').innerText = `${Math.floor(miHPBot)} / ${user.hpMax}`;
+        document.getElementById('hp-en-text').innerText = `${Math.floor(botHP)} / ${botMaxHP}`;
     }
 
     async function fin(win) {
