@@ -13,6 +13,7 @@
             display: flex; flex-direction: column; align-items: center; padding: 20px;
             font-family: 'Special Elite', cursive;
             min-height: 100vh;
+            overflow: hidden; /* Evita barras de scroll con los flashes */
         }
 
         .arena-container {
@@ -21,23 +22,41 @@
             box-shadow: 0 0 100px rgba(0,0,0,1), 0 0 20px rgba(212, 175, 55, 0.2);
             border: 2px solid #5c4021; border-radius: 15px;
             text-align: center; margin-top: 20px;
+            position: relative; /* Para el flash */
+            transition: background-color 0.05s ease-out; /* Flash */
         }
 
         h1 { font-family: 'Cinzel', serif; font-size: 45px; color: #d4af37; margin: 0; text-shadow: 0 0 15px rgba(212, 175, 55, 0.5); }
         .sub { font-size: 14px; letter-spacing: 3px; color: #888; margin-bottom: 30px; }
 
+        /* Pantalla de Selección de Rival */
+        #rival-selection {
+            padding: 20px; background: rgba(0,0,0,0.4); border-radius: 10px; margin-bottom: 30px;
+        }
+        .rival-card {
+            background: #1a150f; border: 1px solid #5c4021; color: #f4e4bc;
+            padding: 15px; margin: 10px; cursor: pointer; transition: 0.3s; border-radius: 8px;
+            font-family: 'Cinzel'; display: inline-block; width: 250px;
+        }
+        .rival-card:hover { border-color: #d4af37; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(212,175,55,0.2); }
+        .rival-card.selected { border-color: #d4af37; background: #2c1e11; box-shadow: 0 0 10px #d4af37; }
+
+        /* ESCENARIO DE DUELO */
+        #duel-stage { display: none; } /* Oculto al inicio */
         .stage {
             display: flex; justify-content: space-between; align-items: center;
             background: rgba(0,0,0,0.5); padding: 30px; border-radius: 10px;
             border: 1px solid #333; margin-bottom: 20px;
         }
-
         .wizard { width: 40%; }
         .hp-container { background: #222; height: 25px; border-radius: 5px; border: 1px solid #d4af37; overflow: hidden; margin-top: 10px; }
         .hp-bar { height: 100%; width: 100%; transition: width 0.4s ease-out; }
         #hp-p { background: linear-gradient(90deg, #2ecc71, #27ae60); }
         #hp-e { background: linear-gradient(90deg, #e74c3c, #c0392b); }
+        .vs { font-family: 'Cinzel'; font-size: 30px; color: #d4af37; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
+        /* MENÚ DE HECHIZOS */
         .spell-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .spell-card {
             background: #1a150f; border: 1px solid #5c4021; color: #f4e4bc;
@@ -46,77 +65,148 @@
         }
         .spell-card:hover { border-color: #d4af37; transform: translateY(-3px); background: #2c1e11; }
 
+        /* LOG DE BATALLA */
         #log {
-            height: 100px; overflow-y: auto; background: #000; border: 1px solid #333;
+            height: 120px; overflow-y: auto; background: #000; border: 1px solid #333;
             margin-top: 25px; padding: 15px; font-size: 14px; text-align: left;
             color: #d4af37; border-radius: 5px;
         }
+        .log-entry { border-bottom: 1px solid #111; padding: 5px 0; }
 
+        /* BOTONES FINAL */
         #actions-end { display: none; margin-top: 20px; }
-        .btn-final { background: #d4af37; color: #000; border: none; padding: 15px 30px; font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border-radius: 5px; }
+        .btn-final {
+            background: #d4af37; color: #000; border: none; padding: 15px 30px;
+            font-family: 'Cinzel'; font-weight: bold; cursor: pointer; border-radius: 5px; margin: 5px;
+        }
     </style>
 </head>
 <body>
 
-    <audio id="snd-spell" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
-    <audio id="snd-hit" src="https://assets.mixkit.co/active_storage/sfx/1655/1655-preview.mp3"></audio>
-    <audio id="snd-win" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
+    <audio id="snd-spell" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3" preload="auto"></audio>
+    <audio id="snd-hit" src="https://assets.mixkit.co/active_storage/sfx/1655/1655-preview.mp3" preload="auto"></audio>
+    <audio id="snd-win" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3" preload="auto"></audio>
+    <audio id="snd-lose" src="https://assets.mixkit.co/active_storage/sfx/901/901-preview.mp3" preload="auto"></audio>
+    <audio id="snd-mortifago" src="https://assets.mixkit.co/active_storage/sfx/1541/1541-preview.mp3" preload="auto"></audio>
 
-    <div class="arena-container">
+    <div class="arena-container" id="arena-main-container">
         <h1>CLUB DE DUELO</h1>
         <div class="sub">HOGWARTS ORIÓN</div>
 
-        <div class="stage">
-            <div class="wizard">
-                <div style="color: #d4af37;">MAGO (TÚ)</div>
-                <div class="hp-container"><div id="hp-p" class="hp-bar"></div></div>
-                <small id="txt-p">100 / 100 PV</small>
+        <div id="rival-selection">
+            <p style="font-family:'Cinzel'; font-size:20px; color:#f4e4bc;">ELIGE TU RIVAL:</p>
+            <div onclick="selectRival('Estudiante', 100, 10, 20, 'Estudiante de Hogwarts', 'https://mixkit.co/free-sound-effects/magic-wand/', '#66cc99')" class="rival-card">
+                ESTUDIANTE 🦉
+                <br><small>Fácil: 100 PV, daño 10-20</small>
             </div>
-            <div style="font-family: 'Cinzel'; font-size: 25px; color: #d4af37;">VS</div>
-            <div class="wizard">
-                <div style="color: #e74c3c;">RIVAL</div>
-                <div class="hp-container"><div id="hp-e" class="hp-bar"></div></div>
-                <small id="txt-e">100 / 100 PV</small>
+            <div onclick="selectRival('Profesor', 150, 20, 30, 'Profesor de DCAO', 'https://mixkit.co/free-sound-effects/magic-spell/', '#ffaa44')" class="rival-card">
+                PROFESOR 🧙‍♂️
+                <br><small>Normal: 150 PV, daño 20-30</small>
             </div>
-        </div>
-
-        <div id="spell-menu">
-            <div class="spell-grid">
-                <button class="spell-card" onclick="atacar('Expelliarmus', 12, 18, '#d4af37')">EXPELLIARMUS ⚡</button>
-                <button class="spell-card" onclick="atacar('Desmaius', 18, 25, '#3498db')">DESMAIUS 💫</button>
-                <button class="spell-card" onclick="atacar('Rictusempra', 8, 30, '#f1c40f')">RICTUSEMPRA 😂</button>
-                <button class="spell-card" onclick="atacar('Sectumsempra', 25, 40, '#c0392b')">SECTUMSEMPRA 🩸</button>
+            <div onclick="selectRival('Mortifago', 200, 30, 45, 'Mortífago Prófugo', 'https://mixkit.co/free-sound-effects/evil-laugh/', '#ff5555')" class="rival-card">
+                MORTÍFAGO 💀
+                <br><small>Difícil: 200 PV, daño 30-45</small>
             </div>
         </div>
 
-        <div id="log"><div class="log-entry">Varitas listas...</div></div>
+        <div id="duel-stage">
+            <div class="stage">
+                <div class="wizard">
+                    <div style="color: #d4af37;">MAGO (TÚ)</div>
+                    <div class="hp-container"><div id="hp-p" class="hp-bar"></div></div>
+                    <small id="txt-p">100 / 100 PV</small>
+                </div>
 
-        <div id="actions-end">
-            <button class="btn-final" onclick="location.reload()">NUEVO DUELO 🔄</button>
+                <div style="font-family: 'Cinzel'; font-size: 25px; color: #d4af37;">VS</div>
+
+                <div class="wizard">
+                    <div id="enemy-name" style="color: #e74c3c;">RIVAL</div>
+                    <div class="hp-container"><div id="hp-e" class="hp-bar"></div></div>
+                    <small id="txt-e">100 / 100 PV</small>
+                </div>
+            </div>
+
+            <div id="spell-menu">
+                <p style="font-family:'Cinzel'; font-size:18px;">ELIGE TU HECHIZO:</p>
+                <div class="spell-grid">
+                    <button class="spell-card" onclick="atacar('Expelliarmus', 12, 18, '#d4af37')">EXPELLIARMUS ⚡</button>
+                    <button class="spell-card" onclick="atacar('Desmaius', 18, 25, '#3498db')">DESMAIUS 💫</button>
+                    <button class="spell-card" onclick="atacar('Rictusempra', 8, 30, '#f1c40f')">RICTUSEMPRA 😂</button>
+                    <button class="spell-card" onclick="atacar('Sectumsempra', 25, 40, '#c0392b')">SECTUMSEMPRA 🩸</button>
+                </div>
+            </div>
+
+            <div id="log"><div class="log-entry">Varitas listas...</div></div>
+
+            <div id="actions-end">
+                <button class="btn-final" onclick="location.reload()">NUEVO DUELO 🔄</button>
+                <button id="post-win-btn" class="btn-final" style="background:#2ecc71; color:black; display:none;" onclick="postToProfeta()">PUBLICAR VICTORIA ✨</button>
+            </div>
         </div>
     </div>
 
     <script>
-        let pLife = 100, eLife = 100;
-        let lock = false;
+        const BASE_DB_URL_PROFETA = "https://profeta-9c8df-default-rtdb.firebaseio.com/periodico"; // <--- CAMBIA ESTA URL POR LA DE TU PROFETA REBELDE
 
-        // Funciones de sonido
+        let playerMaxLife = 100;
+        let playerLife = playerMaxLife;
+        let enemyMaxLife = 100;
+        let enemyLife = enemyMaxLife;
+        let enemyName = "RIVAL";
+        let enemyMinDmg = 10;
+        let enemyMaxDmg = 20;
+        let lockActions = false;
+        let duelWon = false; // Bandera para saber si el jugador ganó
+
+        // --- FUNCIONES DE AUDIO ---
         const playSnd = (id) => { 
             const s = document.getElementById(id); 
             s.currentTime = 0; 
-            s.play().catch(e => console.log("Audio bloqueado por el navegador")); 
+            s.play().catch(e => console.log("Audio bloqueado por el navegador", e)); 
         };
 
+        // --- FUNCIONES VISUALES ---
+        const flashScreen = (color) => {
+            const container = document.getElementById('arena-main-container');
+            container.style.backgroundColor = color;
+            setTimeout(() => container.style.backgroundColor = 'rgba(20, 15, 10, 0.95)', 80); // Vuelve al color original rápido
+        };
+
+        // --- SELECCIÓN DE RIVAL ---
+        function selectRival(type, life, minDmg, maxDmg, name, soundUrl, color) {
+            enemyMaxLife = life;
+            enemyLife = life;
+            enemyMinDmg = minDmg;
+            enemyMaxDmg = maxDmg;
+            enemyName = name;
+
+            document.getElementById('enemy-name').innerText = name;
+            document.getElementById('hp-e').style.backgroundColor = color; // Opcional: Cambiar color de barra rival
+
+            document.getElementById('rival-selection').style.display = 'none';
+            document.getElementById('duel-stage').style.display = 'block';
+            
+            updateBars();
+            showLog(`¡Prepárate! Te enfrentas a un <b>${name}</b>.`, "#f4e4bc");
+            
+            // Si es Mortífago, que suene una risa inicial
+            if (type === 'Mortifago') {
+                playSnd('snd-mortifago');
+            }
+        }
+
+        // --- LÓGICA DE ATAQUE ---
         function atacar(nombre, min, max, color) {
-            if(lock || pLife <= 0 || eLife <= 0) return;
-            lock = true;
+            if(lockActions || pLife <= 0 || eLife <= 0) return;
+            lockActions = true;
 
             playSnd('snd-spell');
+            flashScreen('rgba(144, 238, 144, 0.1)'); // Flash verde al atacar
 
             // Turno Jugador
             let dmg = Math.floor(Math.random() * (max - min + 1)) + min;
             eLife -= dmg;
-            showLog(`🪄 ¡Lanzaste <b>${nombre}</b>! El rival pierde ${dmg} PV.`, color);
+            showLog(`🪄 ¡Lanzaste <b>${nombre}</b>! ${enemyName} pierde ${dmg} PV.`, color);
             updateBars();
 
             if(eLife <= 0) return finish(true);
@@ -124,35 +214,94 @@
             // Turno Enemigo
             setTimeout(() => {
                 playSnd('snd-hit');
-                let eDmg = Math.floor(Math.random() * 20) + 10;
+                flashScreen('rgba(255, 0, 0, 0.1)'); // Flash rojo al recibir daño
+
+                let eDmg = Math.floor(Math.random() * (enemyMaxDmg - enemyMinDmg + 1)) + enemyMinDmg;
                 pLife -= eDmg;
-                showLog(`🔥 El rival responde. Pierdes ${eDmg} PV.`, "#e74c3c");
+                showLog(`🔥 ${enemyName} contraataca. Pierdes ${eDmg} PV.`, "#e74c3c");
                 updateBars();
                 
                 if(pLife <= 0) return finish(false);
-                lock = false;
+                lockActions = false;
             }, 1000);
         }
 
+        // --- ACTUALIZACIÓN BARRAS DE VIDA ---
         function updateBars() {
             if(pLife < 0) pLife = 0; if(eLife < 0) eLife = 0;
-            document.getElementById('hp-p').style.width = pLife + "%";
-            document.getElementById('hp-e').style.width = eLife + "%";
-            document.getElementById('txt-p').innerText = `${pLife} PV`;
-            document.getElementById('txt-e').innerText = `${eLife} PV`;
+            document.getElementById('hp-p').style.width = (pLife / playerMaxLife) * 100 + "%";
+            document.getElementById('hp-e').style.width = (eLife / enemyMaxLife) * 100 + "%";
+            document.getElementById('txt-p').innerText = `${pLife} / ${playerMaxLife} PV`;
+            document.getElementById('txt-e').innerText = `${eLife} / ${enemyMaxLife} PV`;
         }
 
+        // --- REGISTRO DE EVENTOS (LOG) ---
         function showLog(msg, col) {
             const l = document.getElementById('log');
             l.innerHTML = `<div style="border-left: 3px solid ${col}; padding-left:10px; margin-bottom:5px;">${msg}</div>` + l.innerHTML;
+            l.scrollTop = 0; // Para que los últimos mensajes se vean siempre arriba
         }
 
+        // --- FIN DEL DUELO ---
         function finish(win) {
-            playSnd('snd-win');
-            showLog(`<h2>${win ? '¡VICTORIA!' : 'DERROTA'}</h2>`, "#d4af37");
+            duelWon = win;
+            if (win) {
+                playSnd('snd-win');
+                showLog(`<h2>¡VICTORIA! Has derrotado a ${enemyName}.</h2>`, "#d4af37");
+                document.getElementById('post-win-btn').style.display = 'inline-block'; // Muestra el botón de publicar
+            } else {
+                playSnd('snd-lose');
+                showLog(`<h2>DERROTA. ${enemyName} te ha desarmado.</h2>`, "#e74c3c");
+            }
             document.getElementById('spell-menu').style.display = 'none';
             document.getElementById('actions-end').style.display = 'block';
         }
+
+        // --- PUBLICAR VICTORIA EN EL PROFETA REBELDE ---
+        async function postToProfeta() {
+            if (!duelWon) return alert("Solo puedes publicar victorias.");
+
+            const autor = prompt("¿Cuál es tu nombre de mago para el Profeta?", "Mago Desconocido");
+            if (!autor) return;
+
+            const chismeId = Date.now().toString();
+            const chismeData = {
+                id: chismeId,
+                autor: autor,
+                titulo: `¡HAZAÑA EN LA ARENA! ${autor} derrotó a un ${enemyName} en duelo.`,
+                texto: `La Arena de Duelos de Hogwarts Orión fue testigo de una impresionante victoria. ${autor} demostró su habilidad mágica al desarmar y vencer a un temible ${enemyName}. ¡La gloria es para los valientes!`,
+                casa: "General", // O podrías pedir la casa del jugador
+                tipo: "normal",
+                color: "transparent",
+                votos: 0,
+                fecha: new Date().toLocaleString()
+            };
+
+            try {
+                const response = await fetch(`${BASE_DB_URL_PROFETA}/${chismeId}.json`, {
+                    method: 'PUT',
+                    body: JSON.stringify(chismeData),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    alert("¡Tu victoria ha sido anunciada en El Profeta Rebelde!");
+                    document.getElementById('post-win-btn').style.display = 'none'; // Deshabilita el botón tras publicar
+                } else {
+                    alert("Hubo un error al publicar en El Profeta. Asegúrate de que la URL de Firebase es correcta.");
+                }
+            } catch (error) {
+                console.error("Error al publicar en Firebase:", error);
+                alert("No se pudo conectar con El Profeta Rebelde. Revisa la consola para más detalles.");
+            }
+        }
+
+        // Inicializar al cargar la página
+        window.onload = () => {
+            updateBars(); // Actualiza las barras con la vida inicial
+            document.getElementById('hp-p').style.width = "100%";
+            document.getElementById('hp-e').style.width = "100%";
+        };
     </script>
 </body>
 </html>
