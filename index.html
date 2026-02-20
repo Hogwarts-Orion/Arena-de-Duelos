@@ -2,28 +2,36 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Academia de Duelos - Login Cloud</title>
+    <title>Academia de Duelos - El Gran Grimorio</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Special+Elite&display=swap');
         body { background: #050505; color: #f4e4bc; font-family: 'Special Elite', cursive; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .arena-container { background: #1a150f; width: 100%; max-width: 850px; padding: 25px; border: 2px solid #5c4021; border-radius: 15px; text-align: center; box-shadow: 0 0 50px #000; }
+        .arena-container { background: #1a150f; width: 100%; max-width: 900px; padding: 25px; border: 2px solid #5c4021; border-radius: 15px; text-align: center; box-shadow: 0 0 50px #000; }
         .stats-bar { display: flex; justify-content: space-around; background: #2c1e11; padding: 12px; border: 1px solid #d4af37; margin-bottom: 15px; font-family: 'Cinzel'; font-size: 13px; border-radius: 8px; }
         .hp-bar { background: #111; height: 20px; border: 1px solid #d4af37; border-radius: 10px; overflow: hidden; margin: 5px 0; }
         .hp-fill { height: 100%; transition: width 0.3s ease; width: 100%; }
         #hp-mi-fill { background: linear-gradient(90deg, #1b5e20, #4caf50); }
         #hp-en-fill { background: linear-gradient(90deg, #b71c1c, #f44336); }
-        .btn { background: #1a150f; color: #d4af37; border: 1px solid #5c4021; padding: 12px; cursor: pointer; font-family: 'Cinzel'; width: 100%; margin: 4px 0; border-radius: 5px; transition: 0.2s; }
+        .btn { background: #1a150f; color: #d4af37; border: 1px solid #5c4021; padding: 10px; cursor: pointer; font-family: 'Cinzel'; width: 100%; margin: 4px 0; border-radius: 5px; transition: 0.2s; font-size: 12px; }
         .btn:hover:not(:disabled) { background: #d4af37; color: #1a150f; box-shadow: 0 0 10px gold; }
         .btn:disabled { opacity: 0.3; cursor: not-allowed; }
-        #log { height: 140px; overflow-y: auto; background: #000; border: 1px solid #2c1e11; margin-top: 10px; padding: 10px; font-size: 12px; color: #d4af37; border-radius: 5px; text-align: left; }
+        #log { height: 120px; overflow-y: auto; background: #000; border: 1px solid #2c1e11; margin-top: 10px; padding: 10px; font-size: 11px; color: #d4af37; border-radius: 5px; text-align: left; }
         .screen { display: none; }
         .active { display: block; }
-        .reg-input { width: 85%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #5c4021; color: #d4af37; text-align: center; border-radius: 5px; }
-        .spell-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 250px; overflow-y: auto; padding: 10px; }
-        #p-ppt { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a150f; border: 3px solid gold; padding: 20px; z-index: 100; border-radius: 15px; display: none; width: 300px; box-shadow: 0 0 100px #000; }
-        .grimorio { margin-top: 20px; text-align: left; background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; border: 1px solid #333; max-height: 200px; overflow-y: auto; }
-        .spell-list { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 10px; }
+        .reg-input { width: 85%; padding: 12px; margin: 8px 0; background: #000; border: 1px solid #5c4021; color: #d4af37; text-align: center; border-radius: 5px; }
+        
+        /* Layout Grid */
+        .lobby-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-top: 20px; }
+        .panel { background: rgba(0,0,0,0.4); border: 1px solid #333; padding: 15px; border-radius: 10px; }
+        
+        /* Grimorio y Ranking */
+        .scroll-list { height: 300px; overflow-y: auto; text-align: left; font-size: 11px; padding-right: 5px; }
+        .spell-card { border-bottom: 1px solid #2c1e11; padding: 5px 0; margin-bottom: 5px; }
         .unlocked { color: #2ecc71; } .locked { color: #666; }
+        .ranking-item { display: flex; justify-content: space-between; padding: 5px; border-bottom: 1px solid #2c1e11; color: gold; }
+        
+        .spell-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; max-height: 250px; overflow-y: auto; }
+        #p-ppt { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a150f; border: 3px solid gold; padding: 20px; z-index: 100; border-radius: 15px; display: none; width: 300px; box-shadow: 0 0 100px #000; }
     </style>
 </head>
 <body>
@@ -32,31 +40,40 @@
     <h1 style="font-family:'Cinzel'; color:gold; margin:0;">ACADEMIA DE DUELOS</h1>
     
     <div id="p-registro" class="screen">
-        <h3 style="font-family:'Cinzel'">ENTRAR A LA ACADEMIA</h3>
-        <p style="font-size: 11px;">Si no tienes cuenta, se creará una nueva.</p>
+        <h3 style="font-family:'Cinzel'">ACCESO AL MINISTERIO</h3>
         <input type="text" id="reg-nombre" class="reg-input" placeholder="Nombre de Mago">
-        <input type="password" id="reg-pass" class="reg-input" placeholder="Contraseña Mágica">
-        <input type="text" id="reg-emoji" class="reg-input" placeholder="Tu Emoji (ej: 🧙)">
-        <button id="btn-reg" class="btn" onclick="iniciarSesion()">ENTRAR ✨</button>
+        <input type="password" id="reg-pass" class="reg-input" placeholder="Contraseña">
+        <input type="text" id="reg-emoji" class="reg-input" placeholder="Emoji (🧙)">
+        <button id="btn-reg" class="btn" onclick="iniciarSesion()">ACCEDER A LA ACADEMIA ✨</button>
     </div>
 
     <div id="p-lobby" class="screen">
         <div class="stats-bar">
             <span>NIVEL: <b id="stat-lvl" style="color:gold">1</b></span>
-            <span>XP: <b id="stat-xp">0</b></span>
             <span>HP: <b id="stat-hp" style="color:#2ecc71">100</b></span>
+            <span id="saludo" style="color:gold; font-weight:bold;"></span>
         </div>
-        <h3 id="saludo" style="font-family:'Cinzel'"></h3>
-        <button class="btn" onclick="buscarPartida()">DUELO ONLINE ⚔️</button>
-        <button class="btn" style="border-color:#b71c1c; color:#f44336;" onclick="entrenamiento()">ENTRENAR (BOT) 💀</button>
-        <button class="btn" style="font-size: 10px; border:none;" onclick="cerrarSesion()">Cerrar Sesión 🚪</button>
-        <div class="grimorio">
-            <div id="grimorio-lista" class="spell-list"></div>
+        
+        <div style="display:flex; gap:10px;">
+            <button class="btn" onclick="buscarPartida()">DUELO ONLINE ⚔️</button>
+            <button class="btn" onclick="entrenamiento()" style="color:#f44336">BOT 💀</button>
+            <button class="btn" onclick="cerrarSesion()" style="width:100px">SALIR 🚪</button>
+        </div>
+
+        <div class="lobby-grid">
+            <div class="panel">
+                <h3 style="font-family:'Cinzel'; font-size:14px; color:gold;">📖 EL GRAN GRIMORIO</h3>
+                <div id="grimorio-lista" class="scroll-list"></div>
+            </div>
+            <div class="panel">
+                <h3 style="font-family:'Cinzel'; font-size:14px; color:gold;">🏆 TOP MAGOS</h3>
+                <div id="ranking-lista" class="scroll-list"></div>
+            </div>
         </div>
     </div>
 
     <div id="p-ppt">
-        <h3 style="font-family:'Cinzel'; color:gold;">SORTEO</h3>
+        <h3 style="font-family:'Cinzel'; color:gold;">SORTEO INICIAL</h3>
         <button class="btn" onclick="elegirPPT('piedra')">💎 Piedra</button>
         <button class="btn" onclick="elegirPPT('papel')">📜 Papel</button>
         <button class="btn" onclick="elegirPPT('tijera')">✂️ Tijera</button>
@@ -65,7 +82,7 @@
     <div id="p-duelo" class="screen">
         <div class="stats-bar">
             <span id="mi-nombre-display"></span>
-            <span id="turno-txt" style="color:gold">ESPERANDO...</span>
+            <span id="turno-txt" style="color:gold; font-size:18px;">...</span>
             <span id="en-nombre-display"></span>
         </div>
         <div class="hp-bar"><div id="hp-en-fill" class="hp-fill"></div></div>
@@ -77,72 +94,97 @@
 
 <script>
     const DB_BASE = "https://duelos-af899-default-rtdb.firebaseio.com";
+    
+    // --- LISTA COMPLETA DE HECHIZOS ---
     const HECHIZOS = [
-        { n: "Expelliarmus", lvl: 1, dmg: 15 }, { n: "Incendio", lvl: 5, dmg: 20 },
-        { n: "Depulso", lvl: 10, dmg: 25 }, { n: "Offensio", lvl: 15, dmg: 30 },
-        { n: "Furnunculus", lvl: 20, dmg: 35 }, { n: "Oppugno", lvl: 25, dmg: 40 },
-        { n: "Desmaius", lvl: 35, dmg: 50 }, { n: "Sectumsempra", lvl: 140, dmg: 300 },
-        { n: "Crucio", lvl: 150, dmg: 500 }, { n: "Avada Kedavra", lvl: 160, dmg: 999 }
+        // ATAQUE
+        { n: "Expelliarmus", lvl: 1, dmg: 15, d: "Desarma al oponente." },
+        { n: "Incendio", lvl: 4, dmg: 18, d: "Llamas ardientes." },
+        { n: "Depulso", lvl: 8, dmg: 21, d: "Lanza al oponente." },
+        { n: "Offensio", lvl: 12, dmg: 23, d: "Zancadilla mágica." },
+        { n: "Furnunculus", lvl: 16, dmg: 26, d: "Espinillas dolorosas." },
+        { n: "Oppugno", lvl: 20, dmg: 29, d: "Lanza objetos." },
+        { n: "Densaugeo", lvl: 24, dmg: 32, d: "Dientes gigantes." },
+        { n: "Desmaius", lvl: 28, dmg: 35, d: "Aturde al rival." },
+        { n: "Penetro", lvl: 32, dmg: 40, d: "Proyectil afilado." },
+        // FURTIVOS
+        { n: "Rictusempra", lvl: 36, dmg: 43, d: "Cosquillas fatales." },
+        { n: "Flipendo", lvl: 40, dmg: 46, d: "Empuje mágico." },
+        { n: "Immobulus", lvl: 44, dmg: 50, d: "Paraliza totalmente." },
+        { n: "Diffindo", lvl: 48, dmg: 55, d: "Hechizo de corte." },
+        { n: "Impedimenta", lvl: 52, dmg: 60, d: "Ralentiza al rival." },
+        { n: "Melofors", lvl: 56, dmg: 65, d: "Cabeza de calabaza." },
+        { n: "Ebublio", lvl: 60, dmg: 70, d: "Burbuja envolvente." },
+        { n: "Gladii Pluvia", lvl: 65, dmg: 75, d: "Lluvia de agujas." },
+        { n: "Everte Statum", lvl: 70, dmg: 80, d: "Hace tambalear." },
+        { n: "Relaskio", lvl: 75, dmg: 85, d: "Superficie resbaladiza." },
+        { n: "Jinx", lvl: 80, dmg: 95, d: "Rayo de daño grave." },
+        // DEFENSA
+        { n: "Petrificus Totalus", lvl: 85, dmg: 110, d: "Rígido como estatua." },
+        { n: "Bombarda", lvl: 90, dmg: 125, d: "Explosión destructiva." },
+        { n: "Incarcerous", lvl: 95, dmg: 140, d: "Cuerdas mágicas." },
+        { n: "Meteolojinx", lvl: 100, dmg: 160, d: "Tormenta climática." },
+        { n: "Slugulus Eructo", lvl: 105, dmg: 180, d: "Vómito de babosas." },
+        { n: "Mimblewimble", lvl: 110, dmg: 200, d: "Anuda la lengua." },
+        { n: "Cacaetum Aria", lvl: 115, dmg: 220, d: "Destello cegador." },
+        { n: "Confundus", lvl: 120, dmg: 240, d: "Confusión total." },
+        { n: "Geo Terrum", lvl: 125, dmg: 270, d: "Temblor de tierra." },
+        { n: "Lacarnum Inflamari", lvl: 130, dmg: 300, d: "Ropa en llamas." },
+        { n: "Tarantallegra", lvl: 135, dmg: 330, d: "Baile incontrolable." },
+        // MALDICIONES
+        { n: "Sectumsempra", lvl: 140, dmg: 400, d: "Cortes profundos." },
+        { n: "Confringo", lvl: 145, dmg: 480, d: "Explosión ígnea." },
+        { n: "Imperio", lvl: 150, dmg: 550, d: "Control mental." },
+        { n: "Crucio", lvl: 155, dmg: 650, d: "Tortura extrema." },
+        { n: "Avada Kedavra", lvl: 160, dmg: 999, d: "Muerte instantánea." }
     ];
 
     let user = null;
-    let salaId, miRol, loop, esBot, botHP, botMaxHP, miHPActual, lastHPConocido;
-    let yaElegiPPT = false, faseActual = "inicio";
+    let salaId, miRol, loop, esBot, botHP, botMaxHP, miHPActual, lastHPConocido, yaElegiPPT = false;
 
     // --- AUDIO ---
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    function playSound(f1, f2, dur) {
-        const osc = ctx.createOscillator(); const gain = ctx.createGain();
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.frequency.setValueAtTime(f1, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(f2, ctx.currentTime + dur);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + dur);
-        osc.start(); osc.stop(ctx.currentTime + dur);
+    function playSnd(f1, f2, d) {
+        const o = ctx.createOscillator(); const g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.setValueAtTime(f1, ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(f2, ctx.currentTime + d);
+        g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + d);
+        o.start(); o.stop(ctx.currentTime + d);
     }
 
-    // --- LOGIN / REGISTRO CLOUD ---
+    // --- SISTEMA DE LOGIN Y RANKING ---
     async function iniciarSesion() {
         const nom = document.getElementById('reg-nombre').value.trim().toLowerCase();
         const pass = document.getElementById('reg-pass').value;
         const emo = document.getElementById('reg-emoji').value || "🧙";
-        if(!nom || !pass) return alert("Nombre y contraseña obligatorios.");
+        if(!nom || !pass) return alert("Faltan datos.");
 
-        document.getElementById('btn-reg').disabled = true;
         const res = await fetch(`${DB_BASE}/usuarios/${nom}.json`);
         const data = await res.json();
 
         if(data) {
-            if(data.pass === pass) {
-                user = data;
-                alert("¡Bienvenido de nuevo, " + data.nombre + "!");
-            } else {
-                alert("Contraseña incorrecta.");
-                document.getElementById('btn-reg').disabled = false;
-                return;
-            }
+            if(data.pass === pass) user = data;
+            else return alert("Contraseña errónea.");
         } else {
             user = { nombre: nom, pass: pass, emoji: emo, lvl: 1, xp: 0, hpMax: 100 };
             await fetch(`${DB_BASE}/usuarios/${nom}.json`, { method: 'PUT', body: JSON.stringify(user) });
-            alert("Cuenta creada con éxito.");
         }
         localStorage.setItem('mago_sesion', nom);
         init();
     }
 
-    async function autoLogin() {
-        const guardado = localStorage.getItem('mago_sesion');
-        if(guardado) {
-            const res = await fetch(`${DB_BASE}/usuarios/${guardado}.json`);
-            user = await res.json();
-            if(user) init(); else cambiarPantalla('registro');
-        } else {
-            cambiarPantalla('registro');
-        }
-    }
-
-    function cerrarSesion() {
-        localStorage.removeItem('mago_sesion');
-        location.reload();
+    async function cargarRanking() {
+        const res = await fetch(`${DB_BASE}/usuarios.json`);
+        const data = await res.json();
+        const lista = document.getElementById('ranking-lista');
+        lista.innerHTML = "";
+        if(!data) return;
+        
+        const sorted = Object.values(data).sort((a,b) => b.lvl - a.lvl).slice(0, 10);
+        sorted.forEach((m, i) => {
+            lista.innerHTML += `<div class="ranking-item"><span>#${i+1} ${m.emoji} ${m.nombre}</span> <span>Lvl ${m.lvl}</span></div>`;
+        });
     }
 
     function init() {
@@ -150,18 +192,21 @@
         document.getElementById('saludo').innerText = `${user.emoji} ${user.nombre.toUpperCase()}`;
         document.getElementById('stat-lvl').innerText = user.lvl;
         document.getElementById('stat-hp').innerText = user.hpMax;
-        document.getElementById('stat-xp').innerText = `${user.xp}/${(user.lvl*200)}`;
         
-        const g = document.getElementById('grimorio-lista'); g.innerHTML = "";
+        const grim = document.getElementById('grimorio-lista'); grim.innerHTML = "";
         HECHIZOS.forEach(h => {
             const ok = h.lvl <= user.lvl;
-            g.innerHTML += `<div class="${ok?'unlocked':'locked'}">${ok?'✅':'🔒'} ${h.n}</div>`;
+            grim.innerHTML += `<div class="spell-card ${ok?'unlocked':'locked'}">
+                <b>${ok?'✅':'🔒'} ${h.n}</b> (Lvl ${h.lvl})<br>
+                <i style="font-size:9px">${h.d}</i>
+            </div>`;
         });
+        cargarRanking();
     }
 
-    // --- LÓGICA DE DUELO (Igual que antes pero guardando en Cloud al ganar) ---
+    // --- DUELO ---
     async function buscarPartida() {
-        playSound(400, 600, 0.2); esBot = false; yaElegiPPT = false; cambiarPantalla('duelo');
+        playSnd(400, 800, 0.2); yaElegiPPT = false; cambiarPantalla('duelo');
         const res = await fetch(`${DB_BASE}/lobby.json`);
         const lobby = await res.json();
         if(!lobby) {
@@ -181,25 +226,25 @@
         loop = setInterval(async () => {
             const r = await fetch(`${DB_BASE}/salas/${salaId}.json`);
             const d = await r.json(); if(!d) return;
-            faseActual = d.status;
             const miHP = miRol==='p1'?d.p1_hp:d.p2_hp;
             const enHP = miRol==='p1'?d.p2_hp:d.p1_hp;
             document.getElementById('hp-mi-fill').style.width = (miHP/(miRol==='p1'?d.p1_m:d.p2_m)*100) + "%";
             document.getElementById('hp-en-fill').style.width = (enHP/(miRol==='p1'?d.p2_m:d.p1_m)*100) + "%";
             document.getElementById('en-nombre-display').innerText = miRol==='p1'?d.p2_n:d.p1_n;
+            document.getElementById('mi-nombre-display').innerText = user.nombre;
 
-            if(faseActual === "ppt") {
+            if(d.status === "ppt") {
                 if(!yaElegiPPT) document.getElementById('p-ppt').style.display = 'block';
                 if(d.p1_ppt && d.p2_ppt) {
                     document.getElementById('p-ppt').style.display = 'none';
                     if(miRol === 'p1') resolverPPT(d.p1_ppt, d.p2_ppt);
                 }
             }
-            if(faseActual === "jugando") {
-                if(miHP < lastHPConocido) { playSound(200, 50, 0.3); addLog(`💥 -${lastHPConocido - miHP} HP`); lastHPConocido = miHP; }
+            if(d.status === "jugando") {
+                if(miHP < lastHPConocido) { playSnd(200, 50, 0.3); addLog(`💥 IMPACTO! -${lastHPConocido - miHP} HP`); lastHPConocido = miHP; }
                 let mt = d.turno === miRol;
                 document.getElementById('spell-menu').style.pointerEvents = mt ? 'auto' : 'none';
-                document.getElementById('turno-txt').innerText = mt ? "TU TURNO" : "ESPERA";
+                document.getElementById('turno-txt').innerText = mt ? "TU TURNO" : "TURNO RIVAL";
                 if(miHP <= 0) fin(false); if(enHP <= 0) fin(true);
             }
         }, 1000);
@@ -210,24 +255,21 @@
     }
 
     async function resolverPPT(p1, p2) {
-        if(p1 === p2) {
-            await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ p1_ppt: "", p2_ppt: "" })});
-            yaElegiPPT = false; return;
-        }
+        if(p1 === p2) { await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ p1_ppt: "", p2_ppt: "" })}); yaElegiPPT = false; return; }
         let gana = ((p1==='piedra'&&p2==='tijera')||(p1==='papel'&&p2==='piedra')||(p1==='tijera'&&p2==='papel')) ? "p1" : "p2";
         await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ status: "jugando", turno: gana })});
-        addLog(`Sorteo: ${p1} vs ${p2}. Empieza ${gana}`);
+        addLog(`🎲 ${p1} vs ${p2}. Gana ${gana}`);
     }
 
     async function atacar(n, dmg) {
-        playSound(600, 1000, 0.4);
-        let total = Math.floor((dmg + (user.lvl*3)) * (Math.random()*0.4 + 0.8));
+        playSnd(600, 1200, 0.4);
+        let tot = Math.floor((dmg + (user.lvl*3)) * (Math.random()*0.4 + 0.8));
         const r = await fetch(`${DB_BASE}/salas/${salaId}.json`);
         const d = await r.json();
         const t = miRol==='p1'?'p2_hp':'p1_hp';
-        const nv = Math.max(0, (miRol==='p1'?d.p2_hp:d.p1_hp) - total);
+        const nv = Math.max(0, (miRol==='p1'?d.p2_hp:d.p1_hp) - tot);
         await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ [t]: nv, turno: miRol==='p1'?'p2':'p1' })});
-        addLog(`🪄 ${n} (-${total} HP)`);
+        addLog(`🪄 ${n} (-${tot} HP)`);
     }
 
     function cargarHechizosDuelo() {
@@ -238,12 +280,9 @@
     }
 
     async function fin(win) {
-        clearInterval(loop);
-        alert(win ? "¡VICTORIA!" : "DERROTA");
+        clearInterval(loop); alert(win ? "¡VICTORIA!" : "DERROTA");
         user.xp += win ? 200 : 20;
         while(user.xp >= (user.lvl*200)) { user.xp -= (user.lvl*200); user.lvl++; user.hpMax += 30; }
-        
-        // GUARDAR PROGRESO EN FIREBASE
         await fetch(`${DB_BASE}/usuarios/${user.nombre}.json`, { method: 'PUT', body: JSON.stringify(user) });
         location.reload();
     }
@@ -253,11 +292,19 @@
         document.getElementById('p-' + id).classList.add('active');
     }
 
-    function addLog(m) {
-        const l = document.getElementById('log'); l.innerHTML = `<div>> ${m}</div>` + l.innerHTML;
-    }
+    function addLog(m) { const l = document.getElementById('log'); l.innerHTML = `<div>> ${m}</div>` + l.innerHTML; }
+    
+    function cerrarSesion() { localStorage.removeItem('mago_sesion'); location.reload(); }
 
-    autoLogin();
+    // Autologin
+    (async () => {
+        const s = localStorage.getItem('mago_sesion');
+        if(s) {
+            const r = await fetch(`${DB_BASE}/usuarios/${s}.json`);
+            user = await r.json();
+            if(user) init(); else cambiarPantalla('registro');
+        } else cambiarPantalla('registro');
+    })();
 </script>
 </body>
 </html>
