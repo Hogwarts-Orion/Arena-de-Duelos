@@ -2,134 +2,77 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Academia de Duelos - Elite V19</title>
+    <title>Academia de Duelos - Elite V20</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Special+Elite&display=swap');
-        
         :root { --gold: #d4af37; --red: #f44336; --green: #4caf50; --dark: #0a0a0a; }
-
-        body { background: #050505; color: #f4e4bc; font-family: 'Special Elite', cursive; margin: 0; padding: 20px; display: flex; justify-content: center; overflow: hidden; }
-        
-        /* Contenedor con efecto de sacudida */
-        .arena-container { 
-            background: radial-gradient(circle, #1a150f 0%, #0a0a0a 100%); 
-            width: 100%; max-width: 900px; padding: 30px; 
-            border: 3px double var(--gold); border-radius: 15px; 
-            text-align: center; box-shadow: 0 0 60px rgba(212, 175, 55, 0.2); 
-            position: relative; transition: transform 0.1s;
-        }
-
-        /* Animación de Daño */
+        body { background: #050505; color: #f4e4bc; font-family: 'Special Elite', cursive; margin: 0; padding: 20px; display: flex; justify-content: center; overflow-y: auto; }
+        .arena-container { background: radial-gradient(circle, #1a150f 0%, #0a0a0a 100%); width: 100%; max-width: 900px; padding: 30px; border: 3px double var(--gold); border-radius: 15px; text-align: center; box-shadow: 0 0 60px rgba(212, 175, 55, 0.2); position: relative; transition: transform 0.1s; }
         .shake { animation: shake 0.3s; background: rgba(255, 0, 0, 0.1); }
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            20% { transform: translate(-3px, 0px) rotate(-1deg); }
-            40% { transform: translate(3px, 2px) rotate(1deg); }
-            60% { transform: translate(-1px, -1px) rotate(0deg); }
-            100% { transform: translate(0, 0) rotate(0deg); }
-        }
-
+        @keyframes shake { 0% { transform: translate(1px, 1px); } 20% { transform: translate(-3px, 0px); } 40% { transform: translate(3px, 2px); } 100% { transform: translate(0, 0); } }
         .stats-bar { display: flex; justify-content: space-around; background: rgba(44, 30, 17, 0.9); padding: 15px; border: 1px solid var(--gold); margin-bottom: 20px; font-family: 'Cinzel'; border-radius: 10px; align-items: center; }
-        
-        .btn { background: #2c1e11; color: var(--gold); border: 1px solid var(--gold); padding: 10px; cursor: pointer; font-family: 'Cinzel'; border-radius: 5px; transition: 0.3s; font-size: 11px; }
+        .btn { background: #2c1e11; color: var(--gold); border: 1px solid var(--gold); padding: 10px; cursor: pointer; font-family: 'Cinzel'; border-radius: 5px; transition: 0.3s; font-size: 10px; }
         .btn:hover:not(:disabled) { background: var(--gold); color: #1a150f; box-shadow: 0 0 15px gold; }
-        
-        /* Estilo Hechizos Curses */
-        .btn-curse { border-color: #9c27b0; color: #9c27b0; text-shadow: 0 0 5px #9c27b0; }
-        .btn-curse:hover { background: #9c27b0; color: white; }
-
+        .btn-curse { border-color: #9c27b0; color: #9c27b0; }
         .hp-bar-container { position: relative; width: 100%; margin: 10px 0; }
-        .hp-bar { background: #000; height: 30px; border: 1px solid var(--gold); border-radius: 5px; overflow: hidden; box-shadow: inset 0 0 10px rgba(212,175,55,0.5); }
-        .hp-fill { height: 100%; transition: width 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67); width: 100%; }
+        .hp-bar { background: #000; height: 30px; border: 1px solid var(--gold); border-radius: 5px; overflow: hidden; }
+        .hp-fill { height: 100%; transition: width 0.6s ease; width: 100%; }
         #hp-mi-fill { background: linear-gradient(90deg, #1b5e20, #4caf50); }
         #hp-en-fill { background: linear-gradient(90deg, #b71c1c, #f44336); }
-        
-        .hp-text { position: absolute; top: 0; left: 50%; transform: translateX(-50%); font-family: 'Cinzel'; font-size: 16px; color: white; text-shadow: 2px 2px 4px black; line-height: 30px; font-weight: bold; }
-
+        .hp-text { position: absolute; top: 0; left: 50%; transform: translateX(-50%); font-family: 'Cinzel'; font-size: 16px; color: white; text-shadow: 2px 2px 4px black; line-height: 30px; }
         .screen { display: none; } .active { display: block; }
         .panel { background: rgba(0,0,0,0.7); border: 1px solid #5c4021; padding: 15px; border-radius: 8px; height: 280px; overflow-y: auto; text-align: left; }
-
-        #spell-alert { 
-            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); 
-            font-family: 'Cinzel'; font-size: 32px; font-weight: bold;
-            display: none; z-index: 5000; pointer-events: none; width: 100%;
-            text-shadow: 0 0 20px black;
-        }
-
-        #log { height: 100px; overflow-y: auto; background: rgba(0,0,0,0.9); border: 1px solid var(--gold); padding: 10px; margin-top: 10px; font-size: 12px; text-align: left; border-radius: 5px; }
-        
-        .spell-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 15px; max-height: 180px; overflow-y: auto; padding: 5px; }
-
-        /* Piedra Papel Tijera */
+        #spell-alert { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-family: 'Cinzel'; font-size: 32px; display: none; z-index: 5000; text-shadow: 0 0 20px black; }
+        #log { height: 100px; overflow-y: auto; background: rgba(0,0,0,0.9); border: 1px solid var(--gold); padding: 10px; margin-top: 10px; font-size: 12px; text-align: left; }
+        .spell-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 15px; max-height: 200px; overflow-y: auto; padding: 5px; }
         #p-ppt { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 1000; display: none; flex-direction: column; justify-content: center; align-items: center; border-radius: 15px; }
-        .ppt-card { padding: 30px; border: 2px solid var(--gold); border-radius: 15px; cursor: pointer; background: #1a150f; margin: 15px; color: var(--gold); font-family: 'Cinzel'; font-size: 20px; transition: 0.3s; }
-        .ppt-card:hover { transform: scale(1.1) rotate(3deg); background: var(--gold); color: black; }
+        .ppt-card { padding: 25px; border: 2px solid var(--gold); border-radius: 15px; cursor: pointer; background: #1a150f; margin: 10px; color: var(--gold); font-family: 'Cinzel'; }
     </style>
 </head>
 <body>
 
 <div class="arena-container" id="arena">
-    <h1 style="font-family:'Cinzel'; color:var(--gold); margin:0; text-shadow: 0 0 15px var(--gold);">ACADEMIA DE DUELOS</h1>
+    <h1 style="font-family:'Cinzel'; color:var(--gold); margin:0;">ACADEMIA DE DUELOS</h1>
     <div id="spell-alert"></div>
 
     <div id="p-registro" class="screen">
-        <h3 style="font-family:'Cinzel'">IDENTIFÍCATE, MAGO</h3>
-        <input type="text" id="reg-nombre" style="padding:12px; width:60%; margin:10px; background:#111; border:1px solid var(--gold); color:white;" placeholder="Nombre">
-        <input type="password" id="reg-pass" style="padding:12px; width:60%; margin:10px; background:#111; border:1px solid var(--gold); color:white;" placeholder="Contraseña">
-        <br>
-        <button class="btn" style="width:200px; font-size:16px;" onclick="iniciarSesion()">ENTRAR AL CASTILLO</button>
+        <h3 style="font-family:'Cinzel'">REGISTRO DE MAGO</h3>
+        <input type="text" id="reg-nombre" style="padding:12px; width:60%; margin:10px;" placeholder="Nombre">
+        <input type="password" id="reg-pass" style="padding:12px; width:60%; margin:10px;" placeholder="Contraseña">
+        <br><button class="btn" style="width:200px;" onclick="iniciarSesion()">ENTRAR</button>
     </div>
 
     <div id="p-lobby" class="screen">
         <div class="stats-bar">
-            <span id="saludo" style="color:var(--gold); font-weight:bold;"></span>
-            <span>NIVEL: <b id="stat-lvl" style="color:white">1</b></span>
-            <span>MAX HP: <b id="stat-hp" style="color:var(--green)">100</b></span>
+            <span id="saludo" style="color:var(--gold);"></span>
+            <span>LVL: <b id="stat-lvl">1</b></span>
+            <span>MAX HP: <b id="stat-hp">100</b></span>
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <button class="btn" onclick="buscarPartida()" style="font-size:14px; height:50px;">⚔️ DUELO MÁGICO ONLINE</button>
-            <button class="btn" onclick="dueloBot()" style="border-color:var(--red); color:var(--red); font-size:14px;">💀 CAMPO DE ENTRENAMIENTO</button>
+            <button class="btn" onclick="buscarPartida()">DUELO ONLINE ⚔️</button>
+            <button class="btn" onclick="dueloBot()" style="color:var(--red);">DUELO VS BOT 💀</button>
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:20px;">
-            <div class="panel">
-                <h4 style="color:var(--gold); font-family:'Cinzel'; text-align:center; border-bottom:1px solid var(--gold);">GRIMORIO</h4>
-                <div id="grimorio-lista"></div>
-            </div>
-            <div class="panel">
-                <h4 style="color:var(--gold); font-family:'Cinzel'; text-align:center; border-bottom:1px solid var(--gold);">TOP MAGOS</h4>
-                <div id="ranking-lista"></div>
-            </div>
+            <div class="panel"><h4>GRIMORIO</h4><div id="grimorio-lista"></div></div>
+            <div class="panel"><h4>RANKING</h4><div id="ranking-lista"></div></div>
         </div>
-        <button class="btn" onclick="cerrarSesion()" style="margin-top:15px; opacity:0.6;">ABANDONAR ACADEMIA</button>
+        <button class="btn" onclick="cerrarSesion()" style="margin-top:10px;">SALIR</button>
     </div>
 
-    <div id="p-ppt">
-        <h2 style="color:var(--gold); font-family:'Cinzel';">SORTEO DE PRIORIDAD</h2>
-        <div style="display:flex;">
-            <div class="ppt-card" onclick="elegirPPT('piedra')">💎 PIEDRA</div>
-            <div class="ppt-card" onclick="elegirPPT('papel')">📜 PAPEL</div>
-            <div class="ppt-card" onclick="elegirPPT('tijera')">✂️ TIJERA</div>
-        </div>
-        <p id="ppt-info" style="color:white; font-size:18px;"></p>
+    <div id="p-ppt" class="screen">
+        <h2 style="color:var(--gold); font-family:'Cinzel';">PRIORIDAD</h2>
+        <div style="display:flex;"><div class="ppt-card" onclick="elegirPPT('piedra')">💎</div><div class="ppt-card" onclick="elegirPPT('papel')">📜</div><div class="ppt-card" onclick="elegirPPT('tijera')">✂️</div></div>
+        <p id="ppt-info" style="color:white;"></p>
     </div>
 
     <div id="p-duelo" class="screen">
-        <div class="stats-bar" style="margin-bottom:5px;">
-            <span id="mi-nombre-display" style="color:var(--green)"></span>
-            <span id="turno-txt" style="color:var(--gold); background:rgba(0,0,0,0.5); padding:5px 15px; border-radius:20px; font-size:14px;">...</span>
-            <span id="en-nombre-display" style="color:var(--red)"></span>
+        <div class="stats-bar">
+            <span id="mi-nombre-display"></span>
+            <span id="turno-txt" style="color:var(--gold);">...</span>
+            <span id="en-nombre-display"></span>
         </div>
-        
-        <div class="hp-bar-container">
-            <div class="hp-bar"><div id="hp-en-fill" class="hp-fill"></div></div>
-            <div id="hp-en-text" class="hp-text">0 / 0</div>
-        </div>
-        
-        <div class="hp-bar-container">
-            <div class="hp-bar"><div id="hp-mi-fill" class="hp-fill"></div></div>
-            <div id="hp-mi-text" class="hp-text">0 / 0</div>
-        </div>
-
+        <div class="hp-bar-container"><div class="hp-bar"><div id="hp-en-fill" class="hp-fill"></div></div><div id="hp-en-text" class="hp-text">0/0</div></div>
+        <div class="hp-bar-container"><div class="hp-bar"><div id="hp-mi-fill" class="hp-fill"></div></div><div id="hp-mi-text" class="hp-text">0/0</div></div>
         <div id="spell-menu" class="spell-grid"></div>
         <div id="log"></div>
     </div>
@@ -138,20 +81,42 @@
 <script>
     const DB_BASE = "https://duelos-af899-default-rtdb.firebaseio.com";
     
-    // Hechizos actualizados con categorías
+    // TODA LA LISTA DE HECHIZOS SEGÚN TUS INSTRUCCIONES
     const HECHIZOS = [
-        { n: "Expelliarmus", lvl: 1, dmg: 15, c:0 }, { n: "Incendio", lvl: 4, dmg: 18, c:0 },
-        { n: "Depulso", lvl: 8, dmg: 21, c:0 }, { n: "Offensio", lvl: 12, dmg: 23, c:0 },
-        { n: "Furnunculus", lvl: 16, dmg: 26, c:0 }, { n: "Oppugno", lvl: 20, dmg: 29, c:0 },
-        { n: "Desmaius", lvl: 28, dmg: 35, c:0 }, { n: "Rictusempra", lvl: 36, dmg: 43, c:0 },
-        { n: "Flipendo", lvl: 40, dmg: 46, c:0 }, { n: "Diffindo", lvl: 48, dmg: 55, c:0 },
-        { n: "Bombarda", lvl: 90, dmg: 125, c:0 }, { n: "Sectumsempra", lvl: 140, dmg: 400, c:1 },
-        { n: "Confringo", lvl: 145, dmg: 480, c:1 }, { n: "Imperio", lvl: 150, dmg: 550, c:1 },
-        { n: "Crucio", lvl: 155, dmg: 650, c:1 }, { n: "Avada Kedavra", lvl: 160, dmg: 999, c:1 }
+        // Attack
+        { n: "Expelliarmus", lvl: 1, dmg: 15 }, { n: "Incendio", lvl: 5, dmg: 20 }, { n: "Depulso", lvl: 10, dmg: 25 },
+        { n: "Offensio", lvl: 15, dmg: 30 }, { n: "Furnunculus", lvl: 20, dmg: 35 }, { n: "Oppugno", lvl: 25, dmg: 40 },
+        { n: "Densaugeo", lvl: 30, dmg: 45 }, { n: "Desmaius", lvl: 35, dmg: 55 }, { n: "Penetro", lvl: 40, dmg: 65 },
+        // Stealth/Jinx
+        { n: "Rictusempra", lvl: 45, dmg: 70 }, { n: "Flipendo", lvl: 50, dmg: 80 }, { n: "Immobulus", lvl: 55, dmg: 90 },
+        { n: "Diffindo", lvl: 60, dmg: 100 }, { n: "Impedimenta", lvl: 65, dmg: 115 }, { n: "Melofors", lvl: 70, dmg: 130 },
+        { n: "Ebublio", lvl: 75, dmg: 150 }, { n: "Gladii Pluvia", lvl: 80, dmg: 170 }, { n: "Everte Statum", lvl: 85, dmg: 200 },
+        { n: "Relaskio", lvl: 90, dmg: 230 }, { n: "Jinx", lvl: 95, dmg: 260 },
+        // Defense/Utility
+        { n: "Petrificus Totalus", lvl: 100, dmg: 300 }, { n: "Bombarda", lvl: 105, dmg: 350 }, { n: "Incarcerous", lvl: 110, dmg: 400 },
+        { n: "Meteolojinx", lvl: 115, dmg: 460 }, { n: "Slugulus Eructo", lvl: 120, dmg: 520 }, { n: "Mimblewimble", lvl: 125, dmg: 600 },
+        { n: "Cacaetum Aria", lvl: 130, dmg: 680 }, { n: "Confundus", lvl: 135, dmg: 750 }, { n: "Geo Terrum", lvl: 140, dmg: 850 },
+        { n: "Lacarnum Inflamari", lvl: 145, dmg: 950 }, { n: "Tarantallegra", lvl: 150, dmg: 1100 },
+        // Curses
+        { n: "Sectumsempra", lvl: 155, dmg: 1300, c:1 }, { n: "Confringo", lvl: 160, dmg: 1500, c:1 },
+        { n: "Imperio", lvl: 165, dmg: 2000, c:1 }, { n: "Crucio", lvl: 170, dmg: 3000, c:1 },
+        { n: "Avada Kedavra", lvl: 180, dmg: 9999, c:1 }
     ];
 
     let user, salaId, miRol, loop, miTurno = false, esBot = false, botHP = 0, miHPBot = 0;
     let lastProcessedSpell = "";
+
+    // FUNCIÓN DE SONIDO SIMPLE
+    function sonar(freq = 400, type = 'triangle') {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type; osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        osc.connect(gain); gain.connect(ctx.destination);
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+        osc.start(); osc.stop(ctx.currentTime + 0.2);
+    }
 
     async function iniciarSesion() {
         const nom = document.getElementById('reg-nombre').value.trim().toLowerCase();
@@ -163,22 +128,18 @@
         else if(!data) {
             user = { nombre: nom, pass, lvl: 1, xp: 0, hpMax: 100 };
             await fetch(`${DB_BASE}/usuarios/${nom}.json`, { method: 'PUT', body: JSON.stringify(user) });
-        } else return alert("Contraseña incorrecta");
+        } else return alert("Pass incorrecta");
         localStorage.setItem('mago_sesion', nom);
         initAcademia();
     }
 
     async function initAcademia() {
         cambiarPantalla('lobby');
-        document.getElementById('saludo').innerText = "MAESTRO " + user.nombre.toUpperCase();
+        document.getElementById('saludo').innerText = user.nombre.toUpperCase();
         document.getElementById('stat-lvl').innerText = user.lvl;
         document.getElementById('stat-hp').innerText = user.hpMax;
-        
         const grim = document.getElementById('grimorio-lista'); grim.innerHTML = "";
-        HECHIZOS.forEach(h => {
-            const ok = h.lvl <= user.lvl;
-            grim.innerHTML += `<div style="color:${ok?'#2ecc71':'#555'}; font-size:12px; margin-bottom:2px;">${ok?'●':'○'} ${h.n} <small>(Lvl ${h.lvl})</small></div>`;
-        });
+        HECHIZOS.forEach(h => { grim.innerHTML += `<div style="color:${h.lvl<=user.lvl?'#2ecc71':'#555'}">${h.lvl<=user.lvl?'✅':'🔒'} ${h.n}</div>`; });
         cargarRanking();
     }
 
@@ -186,11 +147,9 @@
         const res = await fetch(`${DB_BASE}/usuarios.json`);
         const data = await res.json();
         const list = document.getElementById('ranking-lista'); list.innerHTML = "";
-        if(data) {
-            Object.values(data).sort((a,b)=>b.lvl-a.lvl).slice(0,12).forEach((m,i)=>{
-                list.innerHTML += `<div style="font-size:12px; padding:2px; border-bottom:1px solid #222;">${i+1}. ${m.nombre} <span style="float:right; color:var(--gold)">Lvl ${m.lvl}</span></div>`;
-            });
-        }
+        if(data) Object.values(data).sort((a,b)=>b.lvl-a.lvl).slice(0,10).forEach((m,i)=>{
+            list.innerHTML += `<div>${i+1}. ${m.nombre} (Lvl ${m.lvl})</div>`;
+        });
     }
 
     async function buscarPartida() {
@@ -210,8 +169,7 @@
     }
 
     async function elegirPPT(op) {
-        document.getElementById('ppt-options').style.display = 'none';
-        document.getElementById('ppt-info').innerText = "CONJURO LANZADO...";
+        document.getElementById('p-ppt').style.display = 'none';
         await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ [miRol+"_ppt"]: op })});
     }
 
@@ -221,92 +179,69 @@
             if(esBot) return;
             const r = await fetch(`${DB_BASE}/salas/${salaId}.json`);
             const d = await r.json(); if(!d) return;
-
             if(d.status === "ppt") {
                 document.getElementById('p-ppt').style.display = 'flex';
-                if(d.p1_ppt && d.p2_ppt) {
+                if(d.p1_ppt && d.p2_ppt && miRol === 'p1') {
                     let gana = ((d.p1_ppt==='piedra'&&d.p2_ppt==='tijera')||(d.p1_ppt==='papel'&&d.p2_ppt==='piedra')||(d.p1_ppt==='tijera'&&d.p2_ppt==='papel')) ? "p1" : "p2";
-                    document.getElementById('ppt-info').innerText = `¡${gana==='p1'?d.p1_n:d.p2_n} TIENE LA INICIATIVA!`;
-                    if(miRol === 'p1') setTimeout(async()=> await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ status: "jugando", turno: gana })}), 1500);
+                    await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ status: "jugando", turno: gana })});
                 }
             } else if(d.status === "jugando") {
                 document.getElementById('p-ppt').style.display = 'none';
                 const miHP = miRol === 'p1' ? d.p1_hp : d.p2_hp;
                 const enHP = miRol === 'p1' ? d.p2_hp : d.p1_hp;
-                
-                actualizarInterfaz(miHP, enHP, d);
+                const miM = miRol==='p1'?d.p1_m:d.p2_m; const enM = miRol==='p1'?d.p2_m:d.p1_m;
+                document.getElementById('hp-mi-fill').style.width = (miHP/miM*100) + "%";
+                document.getElementById('hp-en-fill').style.width = (enHP/enM*100) + "%";
+                document.getElementById('hp-mi-text').innerText = `${miHP}/${miM}`;
+                document.getElementById('hp-en-text').innerText = `${enHP}/${enM}`;
+                document.getElementById('en-nombre-display').innerText = miRol==='p1'?d.p2_n:d.p1_n;
+                document.getElementById('mi-nombre-display').innerText = user.nombre;
 
-                // Detección de daño rival con efecto visual
                 if(d.last_spell && d.last_spell !== lastProcessedSpell) {
                     let p = d.last_spell.split(':');
-                    if(p[0] !== user.nombre) {
-                        efectoImpacto(p[1], p[2]);
-                    }
+                    if(p[0] !== user.nombre) efectoImpacto(p[1], p[2]);
                     lastProcessedSpell = d.last_spell;
                 }
-
                 miTurno = (d.turno === miRol);
-                document.getElementById('turno-txt').innerText = miTurno ? "TU TURNO ✨" : "RIVAL LANZANDO...";
-                document.getElementById('spell-menu').style.pointerEvents = miTurno ? "auto" : "none";
+                document.getElementById('turno-txt').innerText = miTurno ? "TU TURNO ✨" : "ESPERANDO...";
                 document.getElementById('spell-menu').style.opacity = miTurno ? "1" : "0.4";
-
                 if(miHP <= 0) fin(false); if(enHP <= 0 && d.p2_n !== "Buscando...") fin(true);
             }
         }, 1000);
     }
 
-    function actualizarInterfaz(mi, en, d) {
-        const miM = miRol==='p1'?d.p1_m:d.p2_m;
-        const enM = miRol==='p1'?d.p2_m:d.p1_m;
-        document.getElementById('hp-mi-fill').style.width = (mi/miM*100) + "%";
-        document.getElementById('hp-en-fill').style.width = (en/enM*100) + "%";
-        document.getElementById('hp-mi-text').innerText = `${mi} / ${miM}`;
-        document.getElementById('hp-en-text').innerText = `${en} / ${enM}`;
-        document.getElementById('en-nombre-display').innerText = miRol==='p1'?d.p2_n:d.p1_n;
-        document.getElementById('mi-nombre-display').innerText = user.nombre;
-    }
-
     async function atacar(n, dmg) {
         if(!miTurno) return; miTurno = false;
-        let crit = Math.random() > 0.85;
-        let t = Math.floor((dmg + (user.lvl*4)) * (Math.random()*0.4 + 0.8));
-        if(crit) { t *= 2; mostrarAlerta("¡GOLPE CRÍTICO!", "#ffeb3b"); }
-        
+        sonar(600, 'sine'); // Sonido al lanzar
+        let t = Math.floor((dmg + (user.lvl*5)) * (Math.random()*0.3 + 0.85));
         if(esBot) {
-            botHP -= t; addLog(`Lanzaste ${n} (-${t} HP)`, 'log-mine');
+            botHP -= t; addLog(`Lanzaste ${n} (-${t})`, 'log-mine');
             actualizarBarrasBot();
             if(botHP <= 0) return fin(true);
             setTimeout(() => {
-                let dBot = 10 + (user.lvl*2); miHPBot -= dBot;
-                efectoImpacto("Incendio", dBot);
-                actualizarBarrasBot();
+                let dBot = 10 + user.lvl; miHPBot -= dBot;
+                efectoImpacto("Bot Spell", dBot); actualizarBarrasBot();
                 if(miHPBot <= 0) fin(false); else miTurno = true;
-            }, 1200);
+            }, 1000);
         } else {
             const r = await fetch(`${DB_BASE}/salas/${salaId}.json`);
             const d = await r.json();
             const target = miRol === 'p1' ? 'p2_hp' : 'p1_hp';
-            const newVal = Math.max(0, (miRol==='p1'?d.p2_hp:d.p1_hp) - t);
             await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ 
-                [target]: newVal, turno: miRol==='p1'?'p2':'p1',
-                last_spell: user.nombre + ":" + n + ":" + t + ":" + Date.now()
+                [target]: Math.max(0, (miRol==='p1'?d.p2_hp:d.p1_hp) - t), 
+                turno: miRol==='p1'?'p2':'p1', last_spell: user.nombre + ":" + n + ":" + t + ":" + Date.now()
             })});
-            addLog(`Lanzaste ${n} (-${t} HP)`, 'log-mine');
+            addLog(`Lanzaste ${n} (-${t})`, 'log-mine');
         }
     }
 
-    function efectoImpacto(hechizo, daño) {
-        const arena = document.getElementById('arena');
-        arena.classList.add('shake');
-        mostrarAlerta(`-${daño} HP (${hechizo})`, "var(--red)");
-        addLog(`Recibes ${hechizo} (-${daño} HP)`, 'log-hit');
-        setTimeout(() => arena.classList.remove('shake'), 300);
-    }
-
-    function mostrarAlerta(txt, color) {
+    function efectoImpacto(h, d) {
+        sonar(150, 'sawtooth'); // Sonido al recibir impacto
+        document.getElementById('arena').classList.add('shake');
         const a = document.getElementById('spell-alert');
-        a.innerText = txt; a.style.color = color; a.style.display = 'block';
-        setTimeout(() => a.style.display = 'none', 1500);
+        a.innerText = `-${d} HP (${h})`; a.style.display = 'block'; a.style.color = 'var(--red)';
+        addLog(`Rival usó ${h} (-${d})`, 'log-hit');
+        setTimeout(() => { document.getElementById('arena').classList.remove('shake'); a.style.display='none'; }, 1000);
     }
 
     function dueloBot() {
@@ -320,22 +255,21 @@
     function actualizarBarrasBot() {
         document.getElementById('hp-mi-fill').style.width = (miHPBot/user.hpMax*100) + "%";
         document.getElementById('hp-en-fill').style.width = (botHP/user.hpMax*100) + "%";
-        document.getElementById('hp-mi-text').innerText = `${miHPBot} / ${user.hpMax}`;
-        document.getElementById('hp-en-text').innerText = `${botHP} / ${user.hpMax}`;
+        document.getElementById('hp-mi-text').innerText = `${miHPBot}/${user.hpMax}`;
+        document.getElementById('hp-en-text').innerText = `${botHP}/${user.hpMax}`;
     }
 
     function cargarHechizosMenu() {
         const m = document.getElementById('spell-menu'); m.innerHTML = "";
         HECHIZOS.filter(h => h.lvl <= user.lvl).reverse().forEach(h => {
-            const cl = h.c === 1 ? 'btn-curse' : '';
-            m.innerHTML += `<button class="btn ${cl}" onclick="atacar('${h.n}', ${h.dmg})">${h.n.toUpperCase()}</button>`;
+            m.innerHTML += `<button class="btn ${h.c?'btn-curse':''}" onclick="atacar('${h.n}', ${h.dmg})">${h.n.toUpperCase()}</button>`;
         });
     }
 
     async function fin(win) {
-        clearInterval(loop); alert(win ? "¡VICTORIA ÉPICA!" : "HAS SIDO DERROTADO");
-        user.xp += win ? 300 : 60;
-        while(user.xp >= (user.lvl*200)) { user.xp -= (user.lvl*200); user.lvl++; user.hpMax += 35; }
+        clearInterval(loop); alert(win ? "VICTORIA" : "DERROTA");
+        user.xp += win ? 300 : 50;
+        while(user.xp >= (user.lvl*200)) { user.xp -= (user.lvl*200); user.lvl++; user.hpMax += 30; }
         await fetch(`${DB_BASE}/usuarios/${user.nombre}.json`, { method: 'PUT', body: JSON.stringify(user) });
         location.reload();
     }
@@ -348,8 +282,7 @@
         const s = localStorage.getItem('mago_sesion');
         if(s) {
             const r = await fetch(`${DB_BASE}/usuarios/${s}.json`);
-            user = await r.json();
-            if(user) initAcademia(); else cambiarPantalla('registro');
+            user = await r.json(); if(user) initAcademia(); else cambiarPantalla('p-registro');
         } else cambiarPantalla('registro');
     })();
 </script>
