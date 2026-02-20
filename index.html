@@ -2,72 +2,69 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Academia de Duelos - Hogwarts Orión</title>
+    <title>Academia de Duelos - Dificultad Hardcore</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Special+Elite&display=swap');
-        body { background: #0a0a0a; color: #f4e4bc; font-family: 'Special Elite', cursive; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .arena-container { background: rgba(20, 15, 10, 0.95); width: 95%; max-width: 800px; padding: 25px; border: 2px solid #5c4021; border-radius: 15px; text-align: center; box-shadow: 0 0 50px black; }
+        body { background: #050505; color: #f4e4bc; font-family: 'Special Elite', cursive; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .arena-container { background: linear-gradient(145deg, #1a150f, #000); width: 95%; max-width: 800px; padding: 25px; border: 2px solid #5c4021; border-radius: 15px; text-align: center; box-shadow: 0 0 60px #000; }
         
-        /* ESTILOS DE INTERFAZ */
-        .stats-bar { display: flex; justify-content: space-around; background: #2c1e11; padding: 10px; border: 1px solid gold; margin-bottom: 15px; font-family: 'Cinzel'; font-size: 13px; border-radius: 8px; }
-        .hp-bar { background: #222; height: 20px; border: 1px solid gold; border-radius: 10px; overflow: hidden; margin: 5px 0; }
-        .hp-fill { height: 100%; transition: width 0.4s ease; width: 100%; }
-        #hp-mi-fill { background: linear-gradient(90deg, #27ae60, #2ecc71); }
-        #hp-en-fill { background: linear-gradient(90deg, #c0392b, #e74c3c); }
+        .stats-bar { display: flex; justify-content: space-around; background: #2c1e11; padding: 12px; border: 1px solid #d4af37; margin-bottom: 15px; font-family: 'Cinzel'; font-size: 13px; border-radius: 8px; box-shadow: inset 0 0 10px black; }
+        .hp-bar { background: #111; height: 22px; border: 1px solid #d4af37; border-radius: 11px; overflow: hidden; margin: 5px 0; box-shadow: 0 0 10px rgba(212,175,55,0.2); }
+        .hp-fill { height: 100%; transition: width 0.3s cubic-bezier(0.17, 0.67, 0.83, 0.67); width: 100%; }
+        #hp-mi-fill { background: linear-gradient(90deg, #1b5e20, #4caf50); }
+        #hp-en-fill { background: linear-gradient(90deg, #b71c1c, #f44336); }
         
-        .btn { background: #1a150f; color: #d4af37; border: 1px solid #d4af37; padding: 12px; cursor: pointer; font-family: 'Cinzel'; width: 100%; margin: 4px 0; font-size: 14px; border-radius: 5px; }
-        .btn:hover:not(:disabled) { background: #d4af37; color: #1a150f; }
+        .btn { background: #1a150f; color: #d4af37; border: 1px solid #5c4021; padding: 12px; cursor: pointer; font-family: 'Cinzel'; width: 100%; margin: 4px 0; font-size: 13px; border-radius: 5px; transition: 0.2s; }
+        .btn:hover:not(:disabled) { background: #d4af37; color: #1a150f; border-color: #fff; box-shadow: 0 0 10px gold; }
         .btn:disabled { opacity: 0.1; cursor: not-allowed; }
 
-        .spell-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 250px; overflow-y: auto; padding: 5px; }
-        #log { height: 70px; overflow-y: auto; background: #000; border: 1px solid #333; margin-top: 10px; padding: 10px; font-size: 12px; text-align: left; color: #d4af37; }
+        .spell-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 250px; overflow-y: auto; padding: 10px; border-top: 1px solid #333; }
+        #log { height: 90px; overflow-y: auto; background: rgba(0,0,0,0.8); border: 1px solid #2c1e11; margin-top: 10px; padding: 10px; font-size: 12px; text-align: left; color: #d4af37; border-radius: 5px; }
         
         .screen { display: none; }
         .active { display: block; }
-
-        /* REGISTRO */
-        .reg-input { width: 80%; padding: 10px; margin: 10px 0; background: #1a150f; border: 1px solid gold; color: white; text-align: center; font-family: 'Special Elite'; }
-        select { width: 84%; padding: 10px; background: #1a150f; border: 1px solid gold; color: white; margin-bottom: 15px; }
+        .reg-input { width: 85%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #5c4021; color: #d4af37; text-align: center; border-radius: 5px; }
+        select { width: 88%; padding: 12px; background: #000; border: 1px solid #5c4021; color: #d4af37; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
 <div class="arena-container">
-    <h1 style="font-family:'Cinzel'; color:gold; margin:0;">ACADEMIA DE DUELOS</h1>
+    <h1 style="font-family:'Cinzel'; color:gold; margin:0; text-shadow: 0 0 15px rgba(212,175,55,0.5);">ACADEMIA DE DUELOS</h1>
     
     <div id="p-registro" class="screen">
-        <h3 style="font-family:'Cinzel'">NUEVO ESTUDIANTE</h3>
-        <input type="text" id="reg-nombre" class="reg-input" placeholder="Nombre de Mago">
-        <input type="text" id="reg-emoji" class="reg-input" placeholder="Emoji (ej: 🐍)">
+        <h3 style="font-family:'Cinzel'">INSCRIPCIÓN DE MAGO</h3>
+        <input type="text" id="reg-nombre" class="reg-input" placeholder="Nombre completo">
+        <input type="text" id="reg-emoji" class="reg-input" placeholder="Tu símbolo (ej: ⚡)">
         <select id="reg-casa">
             <option value="Gryffindor">Gryffindor 🦁</option>
             <option value="Slytherin">Slytherin 🐍</option>
             <option value="Hufflepuff">Hufflepuff 🦡</option>
             <option value="Ravenclaw">Ravenclaw 🦅</option>
         </select>
-        <button class="btn" onclick="registrar()">REGISTRAR VARITA ✨</button>
+        <button class="btn" onclick="registrar()">SELLAR PACTO ✨</button>
     </div>
 
     <div id="p-lobby" class="screen">
         <div class="stats-bar">
-            <span>NIVEL: <b id="stat-lvl">1</b></span>
-            <span>XP: <b id="stat-xp">0</b></span>
-            <span>HP: <b id="stat-hp">100</b></span>
+            <span>NIVEL: <b id="stat-lvl" style="color:gold">1</b></span>
+            <span>XP: <b id="stat-xp">0/150</b></span>
+            <span>HP: <b id="stat-hp" style="color:#2ecc71">100</b></span>
         </div>
-        <h3 id="saludo" style="font-family:'Cinzel'"></h3>
-        <button class="btn" onclick="buscarPartida()">BUSCAR DUELO ONLINE ⚔️</button>
-        <button class="btn" style="border-color:#2ecc71;" onclick="entrenamiento()">ENTRENAR (BOT) 🎓</button>
-        <p id="next-spell" style="font-size:11px; color:gold;"></p>
+        <h3 id="saludo" style="font-family:'Cinzel'; margin: 5px 0;"></h3>
+        <button class="btn" onclick="buscarPartida()">DESAFÍO ONLINE ⚔️</button>
+        <button class="btn" style="border-color:#b71c1c; color:#f44336;" onclick="entrenamiento()">ENTRENAMIENTO MORTAL (BOT) 💀</button>
+        <p id="next-spell" style="font-size:11px; color:#888; margin-top:10px;"></p>
     </div>
 
     <div id="p-duelo" class="screen">
         <div class="stats-bar">
             <span id="mi-nombre-display"></span>
-            <span id="turno-txt" style="color:gold">...</span>
+            <span id="turno-txt" style="color:gold; font-weight:bold;">PREPARANDO...</span>
             <span id="en-nombre-display"></span>
         </div>
         <div class="hp-bar"><div id="hp-en-fill" class="hp-fill"></div></div>
-        <div style="font-family:'Cinzel'; margin: 2px; font-size:12px;">VS</div>
+        <div style="font-family:'Cinzel'; margin: 2px; font-size:11px; color:#555;">CAMPO DE BATALLA</div>
         <div class="hp-bar"><div id="hp-mi-fill" class="hp-fill"></div></div>
         <div id="spell-menu" class="spell-grid"></div>
         <div id="log"></div>
@@ -77,65 +74,51 @@
 <script>
     const DB_BASE = "https://duelos-af899-default-rtdb.firebaseio.com";
     
-    // LISTA DE DESBLOQUEO (Cada 5 niveles uno nuevo)
     const ORDEN_HECHIZOS = [
         { n: "Expelliarmus", lvl: 1, dmg: 15 },
-        { n: "Incendio", lvl: 5, dmg: 18 },
-        { n: "Depulso", lvl: 10, dmg: 20 },
-        { n: "Offensio", lvl: 15, dmg: 22 },
-        { n: "Furnunculus", lvl: 20, dmg: 24 },
-        { n: "Oppugno", lvl: 25, dmg: 26 },
-        { n: "Densaugeo", lvl: 30, dmg: 28 },
-        { n: "Desmaius", lvl: 35, dmg: 30 },
-        { n: "Penetro", lvl: 40, dmg: 32 },
-        { n: "Rictusempra", lvl: 45, dmg: 34 },
-        { n: "Flipendo", lvl: 50, dmg: 36 },
-        { n: "Immobulus", lvl: 55, dmg: 38 },
-        { n: "Diffindo", lvl: 60, dmg: 40 },
-        { n: "Impedimenta", lvl: 65, dmg: 42 },
-        { n: "Melofors", lvl: 70, dmg: 44 },
-        { n: "Ebublio", lvl: 75, dmg: 46 },
-        { n: "Gladii Pluvia", lvl: 80, dmg: 48 },
-        { n: "Everte Statum", lvl: 85, dmg: 50 },
-        { n: "Relaskio", lvl: 90, dmg: 52 },
-        { n: "Jinx", lvl: 95, dmg: 55 },
-        { n: "Petrificus Totalus", lvl: 100, dmg: 60 },
-        { n: "Bombarda", lvl: 105, dmg: 65 },
-        { n: "Incarcerous", lvl: 110, dmg: 70 },
-        { n: "Meteolojinx", lvl: 115, dmg: 75 },
-        { n: "Slugulus Eructo", lvl: 120, dmg: 80 },
-        { n: "Mimblewimble", lvl: 125, dmg: 85 },
-        { n: "Cacaetum Aria", lvl: 130, dmg: 90 },
-        { n: "Confundus", lvl: 135, dmg: 95 },
-        { n: "Geo Terrum", lvl: 140, dmg: 100 },
-        { n: "Sectumsempra", lvl: 145, dmg: 110 },
-        { n: "Crucio", lvl: 150, dmg: 150 },
-        { n: "Avada Kedavra", lvl: 155, dmg: 999 }
+        { n: "Incendio", lvl: 5, dmg: 18 }, { n: "Depulso", lvl: 10, dmg: 21 },
+        { n: "Offensio", lvl: 15, dmg: 24 }, { n: "Furnunculus", lvl: 20, dmg: 27 },
+        { n: "Oppugno", lvl: 25, dmg: 30 }, { n: "Densaugeo", lvl: 30, dmg: 33 },
+        { n: "Desmaius", lvl: 35, dmg: 36 }, { n: "Penetro", lvl: 40, dmg: 39 },
+        { n: "Rictusempra", lvl: 45, dmg: 42 }, { n: "Flipendo", lvl: 50, dmg: 45 },
+        { n: "Immobulus", lvl: 55, dmg: 48 }, { n: "Diffindo", lvl: 60, dmg: 51 },
+        { n: "Impedimenta", lvl: 65, dmg: 54 }, { n: "Melofors", lvl: 70, dmg: 57 },
+        { n: "Ebublio", lvl: 75, dmg: 60 }, { n: "Gladii Pluvia", lvl: 80, dmg: 63 },
+        { n: "Everte Statum", lvl: 85, dmg: 66 }, { n: "Relaskio", lvl: 90, dmg: 69 },
+        { n: "Jinx", lvl: 95, dmg: 75 }, { n: "Petrificus Totalus", lvl: 100, dmg: 85 },
+        { n: "Bombarda", lvl: 105, dmg: 95 }, { n: "Incarcerous", lvl: 110, dmg: 105 },
+        { n: "Meteolojinx", lvl: 115, dmg: 115 }, { n: "Slugulus Eructo", lvl: 120, dmg: 130 },
+        { n: "Mimblewimble", lvl: 125, dmg: 145 }, { n: "Cacaetum Aria", lvl: 130, dmg: 160 },
+        { n: "Confundus", lvl: 135, dmg: 180 }, { n: "Geo Terrum", lvl: 140, dmg: 210 },
+        { n: "Sectumsempra", lvl: 145, dmg: 250 }, { n: "Crucio", lvl: 150, dmg: 350 },
+        { n: "Avada Kedavra", lvl: 155, dmg: 9999 }
     ];
 
-    let user = JSON.parse(localStorage.getItem('duelista_v3'));
-    let salaId, miRol, loop, esBot, botHP, botMaxHP;
+    let user = JSON.parse(localStorage.getItem('duelista_v4'));
+    let salaId, miRol, loop, esBot, botHP, botMaxHP, miHPActual;
 
     function registrar() {
         const nombre = document.getElementById('reg-nombre').value;
-        const emoji = document.getElementById('reg-emoji').value || "🧙‍♂️";
+        const emoji = document.getElementById('reg-emoji').value || "🪄";
         const casa = document.getElementById('reg-casa').value;
-        if(!nombre) return alert("Ingresa tu nombre");
+        if(!nombre) return alert("El Ministerio exige tu nombre.");
         user = { nombre, emoji, casa, lvl: 1, xp: 0, hpMax: 100 };
-        localStorage.setItem('duelista_v3', JSON.stringify(user));
+        localStorage.setItem('duelista_v4', JSON.stringify(user));
         init();
     }
+
+    function calcXP() { return (user.lvl * 150) + (Math.pow(user.lvl, 2) * 10); }
 
     function init() {
         if(!user) return cambiarPantalla('registro');
         cambiarPantalla('lobby');
         document.getElementById('stat-lvl').innerText = user.lvl;
-        document.getElementById('stat-xp').innerText = user.xp + "/" + (user.lvl*100);
+        document.getElementById('stat-xp').innerText = `${user.xp}/${calcXP()}`;
         document.getElementById('stat-hp').innerText = user.hpMax;
-        document.getElementById('saludo').innerText = `${user.emoji} ${user.nombre} de ${user.casa}`;
+        document.getElementById('saludo').innerText = `${user.emoji} ${user.nombre}`;
         
         const siguiente = ORDEN_HECHIZOS.find(h => h.lvl > user.lvl);
-        document.getElementById('next-spell').innerText = siguiente ? `PRÓXIMO HECHIZO: ${siguiente.n} (Nvl ${siguiente.lvl})` : "¡MAESTRÍA TOTAL!";
+        document.getElementById('next-spell').innerText = siguiente ? `Nivel ${siguiente.lvl} para: ${siguiente.n}` : "¡Maestría Absoluta!";
     }
 
     function cargarHechizos() {
@@ -146,115 +129,113 @@
         });
     }
 
-    // --- LÓGICA MULTIJUGADOR ---
-    async function buscarPartida() {
-        esBot = false;
+    // --- ENTRENAMIENTO DIFICIL ---
+    function entrenamiento() {
+        esBot = true;
+        botMaxHP = Math.floor(user.hpMax * 1.25); // 25% más vida que tú
+        botHP = botMaxHP;
+        miHPActual = user.hpMax;
         cambiarPantalla('duelo');
-        document.getElementById('turno-txt').innerText = "BUSCANDO...";
-        const res = await fetch(`${DB_BASE}/lobby.json`);
-        const lobby = await res.json();
-
-        if(!lobby) {
-            salaId = "sala_" + Date.now();
-            miRol = "p1";
-            await fetch(`${DB_BASE}/lobby.json`, { method: 'PUT', body: JSON.stringify({ salaId }) });
-            await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PUT', body: JSON.stringify({
-                p1_n: user.nombre, p1_e: user.emoji, p1_hp: user.hpMax, p1_m: user.hpMax,
-                p2_n: "Buscando...", p2_e: "⏳", p2_hp: 0, p2_m: 0, turno: "p1", status: "esperando"
-            })});
-        } else {
-            salaId = lobby.salaId;
-            miRol = "p2";
-            await fetch(`${DB_BASE}/lobby.json`, { method: 'DELETE' });
-            await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({
-                p2_n: user.nombre, p2_e: user.emoji, p2_hp: user.hpMax, p2_m: user.hpMax, status: "jugando"
-            })});
-        }
-        empezarLoop();
-    }
-
-    function empezarLoop() {
         cargarHechizos();
-        loop = setInterval(async () => {
-            const r = await fetch(`${DB_BASE}/salas/${salaId}.json`);
-            const d = await r.json();
-            if(!d) return;
-
-            const yo = (miRol === 'p1') ? {hp: d.p1_hp, m: d.p1_m, n: d.p1_n, e: d.p1_e} : {hp: d.p2_hp, m: d.p2_m, n: d.p2_n, e: d.p2_e};
-            const en = (miRol === 'p1') ? {hp: d.p2_hp, m: d.p2_m, n: d.p2_n, e: d.p2_e} : {hp: d.p1_hp, m: d.p1_m, n: d.p1_n, e: d.p1_e};
-
-            document.getElementById('hp-mi-fill').style.width = (yo.hp/yo.m*100) + "%";
-            document.getElementById('hp-en-fill').style.width = (en.hp/en.m*100) + "%";
-            document.getElementById('mi-nombre-display').innerText = yo.e + " " + yo.n;
-            document.getElementById('en-nombre-display').innerText = en.n + " " + en.e;
-
-            if(d.status === "jugando") {
-                let miT = d.turno === miRol;
-                document.querySelectorAll('#spell-menu button').forEach(b => b.disabled = !miT);
-                document.getElementById('turno-txt').innerText = miT ? "¡TU TURNO!" : "RIVAL...";
-                if(yo.hp <= 0) fin(false);
-                if(en.hp <= 0) fin(true);
-            }
-        }, 1000);
+        document.getElementById('en-nombre-display').innerText = "💀 BOT ELITE";
+        document.getElementById('mi-nombre-display').innerText = "TÚ";
+        document.getElementById('turno-txt').innerText = "TU TURNO";
+        actBarras();
     }
 
     async function atacar(nombre, dmgBase) {
-        let totalDmg = dmgBase + (user.lvl * 2);
+        let crit = Math.random() > 0.9 ? 1.5 : 1;
+        let totalDmg = Math.floor((dmgBase + (user.lvl * 3)) * crit);
+        
         if(esBot) {
             botHP -= totalDmg;
-            addLog(`✨ ${nombre}: ${totalDmg} daño.`);
-            actualizarBarrasBot();
+            addLog(`✨ ${nombre}: ${totalDmg} daño ${crit > 1 ? '¡CRÍTICO!' : ''}`);
             if(botHP <= 0) return fin(true);
-            document.getElementById('btn-atk').disabled = true;
+            
+            // Turno del BOT (Dificil)
+            document.getElementById('spell-menu').style.pointerEvents = 'none';
+            document.getElementById('turno-txt').innerText = "BOT ATACANDO...";
+            
             setTimeout(() => {
-                let dBot = 8 + (user.lvl * 2);
-                user.hpActual -= dBot;
-                addLog(`🔥 Bot: -${dBot} HP`);
-                actualizarBarrasBot();
-                if(user.hpActual <= 0) fin(false);
-                document.getElementById('btn-atk').disabled = false;
-            }, 800);
+                let dmgBot = Math.floor((10 + (user.lvl * 4)) * (Math.random() * 0.5 + 0.8));
+                miHPActual -= dmgBot;
+                addLog(`🔥 Bot contraataca: -${dmgBot} HP`);
+                actBarras();
+                if(miHPActual <= 0) return fin(false);
+                document.getElementById('turno-txt').innerText = "TU TURNO";
+                document.getElementById('spell-menu').style.pointerEvents = 'auto';
+            }, 700);
         } else {
+            // Lógica Online (similar al anterior con daño escalado)
             const r = await fetch(`${DB_BASE}/salas/${salaId}.json`);
             const d = await r.json();
             let nV = (miRol === 'p1' ? d.p2_hp : d.p1_hp) - totalDmg;
-            let up = {};
-            up[miRol === 'p1' ? 'p2_hp' : 'p1_hp'] = Math.max(0, nV);
-            up['turno'] = (miRol === 'p1' ? 'p2' : 'p1');
-            await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify(up) });
+            await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({
+                [miRol === 'p1' ? 'p2_hp' : 'p1_hp']: Math.max(0, nV),
+                turno: (miRol === 'p1' ? 'p2' : 'p1')
+            })});
         }
     }
 
-    // --- ENTRENAMIENTO BOT ---
-    function entrenamiento() {
-        esBot = true;
-        botMaxHP = 70 + (user.lvl * 25);
-        botHP = botMaxHP;
-        user.hpActual = user.hpMax;
-        cambiarPantalla('duelo');
-        cargarHechizos();
-        document.getElementById('en-nombre-display').innerText = "🤖 BOT";
-        document.getElementById('mi-nombre-display').innerText = user.nombre;
-        document.getElementById('turno-txt').innerText = "¡DALE!";
-        actualizarBarrasBot();
-    }
-
-    function actualizarBarrasBot() {
+    function actBarras() {
         document.getElementById('hp-en-fill').style.width = (botHP / botMaxHP * 100) + "%";
-        document.getElementById('hp-mi-fill').style.width = (user.hpActual / user.hpMax * 100) + "%";
+        document.getElementById('hp-mi-fill').style.width = (miHPActual / user.hpMax * 100) + "%";
     }
 
     function fin(win) {
         clearInterval(loop);
-        let xp = win ? (esBot ? 25 : 80) : 10;
-        alert(win ? "¡GANASTE!" : "PERDISTE");
-        user.xp += xp;
-        if(user.xp >= user.lvl * 100) {
-            user.lvl++; user.xp = 0; user.hpMax += 15;
-            alert("¡NIVEL " + user.lvl + "!");
+        let recompensa = win ? (esBot ? 40 : 120) : 5;
+        alert(win ? "¡VICTORIA TRIUNFAL!" : "HAS SIDO HUMILLADO...");
+        user.xp += recompensa;
+        while(user.xp >= calcXP()) {
+            user.xp -= calcXP();
+            user.lvl++;
+            user.hpMax += 25;
+            alert("¡ASCENSO! Ahora eres Nivel " + user.lvl);
         }
-        localStorage.setItem('duelista_v3', JSON.stringify(user));
+        localStorage.setItem('duelista_v4', JSON.stringify(user));
         location.reload();
+    }
+
+    // --- LÓGICA ONLINE ---
+    async function buscarPartida() {
+        esBot = false;
+        cambiarPantalla('duelo');
+        const res = await fetch(`${DB_BASE}/lobby.json`);
+        const lobby = await res.json();
+        if(!lobby) {
+            salaId = "sala_" + Date.now(); miRol = "p1";
+            await fetch(`${DB_BASE}/lobby.json`, { method: 'PUT', body: JSON.stringify({ salaId }) });
+            await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PUT', body: JSON.stringify({
+                p1_n: user.nombre, p1_hp: user.hpMax, p1_m: user.hpMax, p2_hp: 0, p2_m: 0, turno: "p1", status: "esperando"
+            })});
+        } else {
+            salaId = lobby.salaId; miRol = "p2";
+            await fetch(`${DB_BASE}/lobby.json`, { method: 'DELETE' });
+            await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({
+                p2_n: user.nombre, p2_hp: user.hpMax, p2_m: user.hpMax, status: "jugando"
+            })});
+        }
+        loop = setInterval(async () => {
+            const r = await fetch(`${DB_BASE}/salas/${salaId}.json`);
+            const d = await r.json();
+            if(!d) return;
+            const yo = (miRol === 'p1') ? d.p1_hp : d.p2_hp;
+            const en = (miRol === 'p1') ? d.p2_hp : d.p1_hp;
+            const mYo = (miRol === 'p1') ? d.p1_m : d.p2_m;
+            const mEn = (miRol === 'p1') ? d.p2_m : d.p1_m;
+            document.getElementById('hp-mi-fill').style.width = (yo/mYo*100) + "%";
+            document.getElementById('hp-en-fill').style.width = (en/mEn*100) + "%";
+            document.getElementById('mi-nombre-display').innerText = user.nombre;
+            document.getElementById('en-nombre-display').innerText = d.status === "jugando" ? "OPONENTE" : "ESPERANDO...";
+            if(d.status === "jugando") {
+                let mt = d.turno === miRol;
+                document.getElementById('spell-menu').style.pointerEvents = mt ? 'auto' : 'none';
+                document.getElementById('turno-txt').innerText = mt ? "TU TURNO" : "ESPERA";
+                if(yo <= 0) fin(false); if(en <= 0) fin(true);
+            }
+        }, 1000);
+        cargarHechizos();
     }
 
     function cambiarPantalla(id) {
@@ -265,6 +246,7 @@
     function addLog(m) {
         const l = document.getElementById('log');
         l.innerHTML = `<div>${m}</div>` + l.innerHTML;
+        l.scrollTop = 0;
     }
 
     init();
