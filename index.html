@@ -2,94 +2,111 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Academia de Duelos - Sistema de Ligas V21</title>
+    <title>Academia de Duelos - Hardcore V22</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Special+Elite&display=swap');
-        :root { --gold: #d4af37; --red: #f44336; --green: #4caf50; --blue: #3498db; }
-        body { background: #050505; color: #f4e4bc; font-family: 'Special Elite', cursive; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .arena-container { background: radial-gradient(circle, #1a150f 0%, #0a0a0a 100%); width: 100%; max-width: 950px; padding: 25px; border: 3px double var(--gold); border-radius: 15px; text-align: center; box-shadow: 0 0 60px rgba(212, 175, 55, 0.2); position: relative; }
-        .stats-bar { display: flex; justify-content: space-around; background: rgba(44, 30, 17, 0.9); padding: 12px; border: 1px solid var(--gold); margin-bottom: 15px; font-family: 'Cinzel'; border-radius: 10px; font-size: 13px; }
-        .liga-badge { color: var(--blue); font-weight: bold; text-shadow: 0 0 5px var(--blue); }
-        .btn { background: #2c1e11; color: var(--gold); border: 1px solid var(--gold); padding: 12px; cursor: pointer; font-family: 'Cinzel'; border-radius: 5px; transition: 0.3s; font-size: 11px; width: 100%; margin: 5px 0; }
-        .btn:hover:not(:disabled) { background: var(--gold); color: #1a150f; box-shadow: 0 0 15px gold; }
-        .hp-bar-container { position: relative; width: 100%; margin: 8px 0; }
-        .hp-bar { background: #000; height: 35px; border: 2px solid var(--gold); border-radius: 8px; overflow: hidden; }
-        .hp-fill { height: 100%; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); width: 100%; }
-        #hp-mi-fill { background: linear-gradient(90deg, #1b5e20, #4caf50); }
-        #hp-en-fill { background: linear-gradient(90deg, #b71c1c, #f44336); }
-        .hp-text { position: absolute; top: 0; left: 50%; transform: translateX(-50%); font-family: 'Cinzel'; font-size: 18px; color: white; text-shadow: 2px 2px 4px black; line-height: 35px; }
+        :root { --gold: #d4af37; --red: #ff4d4d; --green: #2ecc71; --blue: #3498db; --purple: #9b59b6; }
+        body { background: #020202; color: #f4e4bc; font-family: 'Special Elite', cursive; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .arena-container { background: radial-gradient(circle, #120f0a 0%, #000 100%); width: 100%; max-width: 1000px; padding: 25px; border: 2px solid var(--gold); border-radius: 10px; text-align: center; box-shadow: 0 0 50px rgba(0,0,0,1); position: relative; }
+        .stats-bar { display: flex; justify-content: space-around; background: rgba(20, 15, 10, 0.95); padding: 12px; border: 1px solid #444; margin-bottom: 15px; font-family: 'Cinzel'; font-size: 12px; border-radius: 5px; }
+        .btn { background: #1a1510; color: var(--gold); border: 1px solid #5c4021; padding: 10px; cursor: pointer; font-family: 'Cinzel'; border-radius: 3px; transition: 0.2s; font-size: 10px; width: 100%; }
+        .btn:hover { background: var(--gold); color: #000; }
+        .hp-bar { background: #111; height: 30px; border: 1px solid var(--gold); border-radius: 5px; overflow: hidden; position: relative; margin: 5px 0; }
+        .hp-fill { height: 100%; transition: width 1s ease-out; width: 100%; }
+        #hp-mi-fill { background: linear-gradient(90deg, #145a32, var(--green)); }
+        #hp-en-fill { background: linear-gradient(90deg, #7b241c, var(--red)); }
+        .hp-text { position: absolute; width: 100%; text-align: center; color: white; font-family: 'Cinzel'; line-height: 30px; text-shadow: 1px 1px 3px black; }
         .screen { display: none; } .active { display: block; }
-        .panel { background: rgba(0,0,0,0.8); border: 1px solid #5c4021; padding: 15px; border-radius: 8px; height: 300px; overflow-y: auto; text-align: left; }
-        #spell-alert { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); font-family: 'Cinzel'; font-size: 35px; display: none; z-index: 5000; text-align: center; width: 90%; pointer-events: none; }
-        .spell-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; max-height: 250px; overflow-y: auto; padding: 10px; }
-        .shake { animation: shake 0.4s; }
-        @keyframes shake { 0% { transform: translate(2px, 2px); } 20% { transform: translate(-4px, -2px); } 100% { transform: translate(0,0); } }
+        .panel { background: rgba(0,0,0,0.9); border: 1px solid #333; padding: 15px; border-radius: 5px; height: 350px; overflow-y: auto; text-align: left; }
+        #spell-alert { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-family: 'Cinzel'; font-size: 40px; display: none; z-index: 999; text-align: center; pointer-events: none; text-shadow: 0 0 20px #000; }
+        .spell-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; max-height: 220px; overflow-y: auto; }
+        .rank-info { font-size: 11px; margin: 4px 0; padding: 4px; border-bottom: 1px solid #222; }
     </style>
 </head>
 <body>
 
 <div class="arena-container" id="arena">
-    <h1 style="font-family:'Cinzel'; color:var(--gold); margin:0; letter-spacing: 3px;">TORNEO DE LEYENDAS</h1>
+    <h1 style="font-family:'Cinzel'; color:var(--gold); margin:0;">LEGADO DE HECHICEROS</h1>
     <div id="spell-alert"></div>
 
     <div id="p-registro" class="screen">
-        <h2 style="font-family:'Cinzel'">INICIACIÓN</h2>
-        <input type="text" id="reg-nombre" style="padding:15px; width:60%; margin:10px; background:#111; color:white; border:1px solid var(--gold);" placeholder="Tu nombre de mago">
-        <input type="password" id="reg-pass" style="padding:15px; width:60%; margin:10px; background:#111; color:white; border:1px solid var(--gold);" placeholder="Contraseña">
-        <br><button class="btn" style="width:250px; font-size:18px;" onclick="iniciarSesion()">ACCEDER</button>
+        <h2 style="font-family:'Cinzel'">LIBRO DE REGISTRO</h2>
+        <input type="text" id="reg-nombre" style="padding:15px; width:60%; margin:10px; background:#000; color:white; border:1px solid var(--gold);" placeholder="Nombre del Mago">
+        <input type="password" id="reg-pass" style="padding:15px; width:60%; margin:10px; background:#000; color:white; border:1px solid var(--gold);" placeholder="Contraseña">
+        <br><button class="btn" style="width:200px; font-size:16px;" onclick="iniciarSesion()">ENTRAR</button>
     </div>
 
     <div id="p-lobby" class="screen">
         <div class="stats-bar">
             <span>🧙‍♂️ <b id="saludo"></b></span>
-            <span>🏆 <b id="stat-liga" class="liga-badge"></b></span>
+            <span style="color:var(--blue)">RANK: <b id="stat-liga"></b></span>
             <span>LVL: <b id="stat-lvl"></b></span>
             <span>HP: <b id="stat-hp" style="color:var(--green)"></b></span>
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-            <button class="btn" onclick="buscarDuelo('ranked')" style="border-color:cyan;">⚔️ RANKED (Liga)</button>
-            <button class="btn" onclick="buscarDuelo('libre')">⚡ DUELO LIBRE</button>
-            <button class="btn" onclick="dueloBot()" style="border-color:var(--red);">📖 ACADEMIA (Bot)</button>
+            <button class="btn" onclick="buscarDuelo('ranked')">⚔️ DUELO CLASIFICATORIO</button>
+            <button class="btn" onclick="dueloBot()">📖 ENTRENAR (BOT)</button>
+            <button class="btn" onclick="verRangos()">📜 VER TODOS LOS RANGOS</button>
         </div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-top:20px;">
-            <div class="panel"><h4 style="text-align:center; color:var(--gold); border-bottom:1px solid var(--gold);">GRIMORIO</h4><div id="grimorio-lista"></div></div>
-            <div class="panel"><h4 style="text-align:center; color:var(--gold); border-bottom:1px solid var(--gold);">RANKING MUNDIAL</h4><div id="ranking-lista"></div></div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:15px;">
+            <div class="panel"><h4>GRIMORIO PERSONAL</h4><div id="grimorio-lista"></div></div>
+            <div class="panel"><h4>SALÓN DE LA FAMA</h4><div id="ranking-lista"></div></div>
         </div>
     </div>
 
+    <div id="p-rangos" class="screen panel" style="position:absolute; width:80%; left:10%; top:10%; height:80%; z-index:1000;">
+        <h3 style="text-align:center; color:var(--gold); font-family:'Cinzel';">JERARQUÍA MÁGICA</h3>
+        <div id="lista-rangos-completa"></div>
+        <button class="btn" onclick="cambiarPantalla('lobby')" style="margin-top:10px;">CERRAR</button>
+    </div>
+
     <div id="p-duelo" class="screen">
-        <div class="stats-bar" style="margin-bottom:5px;">
-            <span id="mi-nombre-display" style="color:var(--green)"></span>
-            <span id="turno-txt" style="color:var(--gold); border:1px solid var(--gold); padding:2px 10px;">...</span>
-            <span id="en-nombre-display" style="color:var(--red)"></span>
+        <div class="stats-bar">
+            <span id="mi-nombre-display"></span>
+            <span id="turno-txt" style="background:var(--gold); color:black; padding:0 10px;">...</span>
+            <span id="en-nombre-display"></span>
         </div>
-        <div class="hp-bar-container"><div class="hp-bar"><div id="hp-en-fill" class="hp-fill"></div></div><div id="hp-en-text" class="hp-text">0/0</div></div>
-        <div class="hp-bar-container"><div class="hp-bar"><div id="hp-mi-fill" class="hp-fill"></div></div><div id="hp-mi-text" class="hp-text">0/0</div></div>
+        <div class="hp-bar"><div id="hp-en-fill" class="hp-fill"></div><div id="hp-en-text" class="hp-text">0/0</div></div>
+        <div class="hp-bar"><div id="hp-mi-fill" class="hp-fill"></div><div id="hp-mi-text" class="hp-text">0/0</div></div>
         <div id="spell-menu" class="spell-grid"></div>
-        <div id="log" style="height: 120px; background: rgba(0,0,0,0.9); padding:10px; overflow-y:auto; border-radius:5px; border:1px solid #333; font-size:11px; text-align:left;"></div>
+        <div id="log" style="height:100px; overflow-y:auto; font-size:10px; background:#000; padding:10px; margin-top:10px; text-align:left; border:1px solid #222;"></div>
     </div>
 </div>
 
 <script>
     const DB_BASE = "https://duelos-af899-default-rtdb.firebaseio.com";
     
+    // JERARQUÍA EXPANDIDA (10 RANGOS)
     const LIGAS = [
-        { n: "Aprendiz de Varita", min: 1 },
-        { n: "Duelista Errante", min: 11 },
-        { n: "Guardián de Arcanos", min: 31 },
-        { n: "Maestro de Hechizos", min: 71 },
-        { n: "Señor de la Magia", min: 151 }
+        { n: "Novato de la Torre", min: 1 }, { n: "Iniciado del Cáliz", min: 10 },
+        { n: "Aprendiz de Varita", min: 25 }, { n: "Duelista Errante", min: 45 },
+        { n: "Guardián de Arcanos", min: 70 }, { n: "Ejecutor de Sombras", min: 100 },
+        { n: "Maestro de Hechizos", min: 140 }, { n: "Archimago del Consejo", min: 190 },
+        { n: "Señor de la Magia", min: 250 }, { n: "Hechicero Supremo", min: 350 }
     ];
 
+    // LISTA COMPLETA DE HECHIZOS (SEGÚN TUS INSTRUCCIONES)
     const HECHIZOS = [
-        { n: "Expelliarmus", lvl: 1, dmg: 50 }, { n: "Incendio", lvl: 5, dmg: 80 }, { n: "Depulso", lvl: 10, dmg: 120 },
-        { n: "Offensio", lvl: 15, dmg: 180 }, { n: "Furnunculus", lvl: 20, dmg: 250 }, { n: "Oppugno", lvl: 25, dmg: 350 },
-        { n: "Desmaius", lvl: 35, dmg: 500 }, { n: "Flipendo", lvl: 50, dmg: 800 }, { n: "Impedimenta", lvl: 65, dmg: 1200 },
-        { n: "Ebublio", lvl: 80, dmg: 1800 }, { n: "Relaskio", lvl: 100, dmg: 3000 }, { n: "Bombarda", lvl: 120, dmg: 5000 },
-        { n: "Sectumsempra", lvl: 140, dmg: 8000 }, { n: "Crucio", lvl: 160, dmg: 15000 }, { n: "Avada Kedavra", lvl: 180, dmg: 50000 }
+        // Ataque
+        { n: "Expelliarmus", lvl: 1, d: 80 }, { n: "Incendio", lvl: 5, d: 150 }, { n: "Depulso", lvl: 10, d: 250 },
+        { n: "Offensio", lvl: 15, d: 380 }, { n: "Furnunculus", lvl: 20, d: 500 }, { n: "Oppugno", lvl: 30, d: 700 },
+        { n: "Densaugeo", lvl: 40, d: 950 }, { n: "Desmaius", lvl: 55, d: 1300 }, { n: "Penetro", lvl: 70, d: 1800 },
+        // Stealth / Jinx
+        { n: "Rictusempra", lvl: 85, d: 2400 }, { n: "Flipendo", lvl: 100, d: 3200 }, { n: "Immobulus", lvl: 115, d: 4100 },
+        { n: "Diffindo", lvl: 130, d: 5200 }, { n: "Impedimenta", lvl: 145, d: 6500 }, { n: "Melofors", lvl: 160, d: 8000 },
+        { n: "Ebublio", lvl: 175, d: 10000 }, { n: "Gladii Pluvia", lvl: 190, d: 13000 }, { n: "Everte Statum", lvl: 210, d: 17000 },
+        { n: "Relaskio", lvl: 230, d: 22000 }, { n: "Jinx", lvl: 250, d: 28000 },
+        // Defensa / Potentes
+        { n: "Petrificus Totalus", lvl: 270, d: 35000 }, { n: "Bombarda", lvl: 290, d: 43000 }, { n: "Incarcerous", lvl: 310, d: 52000 },
+        { n: "Meteolojinx", lvl: 330, d: 65000 }, { n: "Slugulus Eructo", lvl: 350, d: 80000 }, { n: "Mimblewimble", lvl: 370, d: 100000 },
+        { n: "Confundus", lvl: 390, d: 130000 }, { n: "Geo Terrum", lvl: 410, d: 170000 }, { n: "Tarantallegra", lvl: 430, d: 220000 },
+        // Maldiciones (Curses)
+        { n: "Sectumsempra", lvl: 450, d: 300000, c:1 }, { n: "Confringo", lvl: 470, d: 450000, c:1 },
+        { n: "Imperio", lvl: 490, d: 700000, c:1 }, { n: "Crucio", lvl: 520, d: 1200000, c:1 },
+        { n: "Avada Kedavra", lvl: 550, d: 9999999, c:1 }
     ];
 
-    let user, salaId, miRol, loop, miTurno = false, esBot = false, botHP = 0, miHPBot = 0, lastProcessedSpell = "";
+    let user, salaId, miRol, loop, miTurno = false, esBot = false, botHP = 0, miHPBot = 0;
 
     function sonar(f, t) {
         try {
@@ -97,10 +114,10 @@
             const o = ctx.createOscillator(); const g = ctx.createGain();
             o.type = t; o.frequency.setValueAtTime(f, ctx.currentTime);
             o.connect(g); g.connect(ctx.destination);
-            g.gain.setValueAtTime(0.1, ctx.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-            o.start(); o.stop(ctx.currentTime + 0.3);
-        } catch(e) {}
+            g.gain.setValueAtTime(0.05, ctx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+            o.start(); o.stop(ctx.currentTime + 0.4);
+        } catch(e){}
     }
 
     async function iniciarSesion() {
@@ -111,15 +128,23 @@
         const d = await res.json();
         if(d && d.pass === pass) user = d;
         else if(!d) {
-            user = { nombre: nom, pass, lvl: 1, xp: 0, hpMax: 1000, liga: "Aprendiz de Varita" };
+            user = { nombre: nom, pass, lvl: 1, xp: 0, hpMax: 2000, liga: "Novato de la Torre" };
             await fetch(`${DB_BASE}/usuarios/${nom}.json`, { method: 'PUT', body: JSON.stringify(user) });
-        } else return alert("Pass incorrecta");
+        } else return alert("Acceso denegado");
         localStorage.setItem('mago_sesion', nom);
         initAcademia();
     }
 
     function getLiga(lvl) {
         return LIGAS.slice().reverse().find(l => lvl >= l.min).n;
+    }
+
+    function verRangos() {
+        const l = document.getElementById('lista-rangos-completa'); l.innerHTML = "";
+        LIGAS.forEach(r => {
+            l.innerHTML += `<div class="rank-info" style="color:${user.liga===r.n?'var(--gold)':'white'}"><b>${r.n}</b> - Requiere Nivel ${r.min}</div>`;
+        });
+        cambiarPantalla('rangos');
     }
 
     async function initAcademia() {
@@ -132,8 +157,7 @@
         
         const grim = document.getElementById('grimorio-lista'); grim.innerHTML = "";
         HECHIZOS.forEach(h => {
-            const ok = h.lvl <= user.lvl;
-            grim.innerHTML += `<div style="color:${ok?'var(--green)':'#555'}; font-size:12px;">${ok?'●':'○'} ${h.n} (Lvl ${h.lvl})</div>`;
+            if(h.lvl <= user.lvl) grim.innerHTML += `<div style="color:var(--green); font-size:10px;">★ ${h.n}</div>`;
         });
         cargarRanking();
     }
@@ -142,18 +166,16 @@
         const res = await fetch(`${DB_BASE}/usuarios.json`);
         const d = await res.json();
         const l = document.getElementById('ranking-lista'); l.innerHTML = "";
-        if(d) Object.values(d).sort((a,b)=>b.lvl-a.lvl).slice(0,10).forEach((m,i)=> {
-            l.innerHTML += `<div style="font-size:12px; border-bottom:1px solid #222;">#${i+1} ${m.nombre} - <span style="color:cyan">${m.liga}</span></div>`;
+        if(d) Object.values(d).sort((a,b)=>b.lvl-a.lvl).slice(0,12).forEach((m,i)=> {
+            l.innerHTML += `<div style="font-size:10px; padding:3px; border-bottom:1px solid #111;">#${i+1} ${m.nombre} - Lvl ${m.lvl}</div>`;
         });
     }
 
     async function buscarDuelo(tipo) {
         esBot = false; cambiarPantalla('duelo');
-        document.getElementById('log').innerHTML = "Buscando oponente en tu liga...";
-        const lobbyKey = tipo === 'ranked' ? `lobby_${user.liga.replace(/ /g, '_')}` : 'lobby_libre';
+        const lobbyKey = `lobby_${user.liga.replace(/ /g, '_')}`;
         const res = await fetch(`${DB_BASE}/${lobbyKey}.json`);
         const lobby = await res.json();
-
         if(lobby && lobby.uid !== user.nombre) {
             salaId = lobby.salaId; miRol = "p2";
             await fetch(`${DB_BASE}/${lobbyKey}.json`, { method: 'DELETE' });
@@ -172,81 +194,61 @@
             if(esBot) return;
             const r = await fetch(`${DB_BASE}/salas/${salaId}.json`);
             const d = await r.json(); if(!d) return;
-
             if(d.status === "jugando") {
                 const miHP = miRol === 'p1' ? d.p1_hp : d.p2_hp;
                 const enHP = miRol === 'p1' ? d.p2_hp : d.p1_hp;
                 const miM = miRol === 'p1' ? d.p1_m : d.p2_m;
                 const enM = miRol === 'p1' ? d.p2_m : d.p1_m;
-                
                 document.getElementById('hp-mi-fill').style.width = (miHP/miM*100) + "%";
                 document.getElementById('hp-en-fill').style.width = (enHP/enM*100) + "%";
                 document.getElementById('hp-mi-text').innerText = `${Math.floor(miHP)} / ${miM}`;
                 document.getElementById('hp-en-text').innerText = `${Math.floor(enHP)} / ${enM}`;
                 document.getElementById('en-nombre-display').innerText = miRol==='p1'?d.p2_n:d.p1_n;
                 document.getElementById('mi-nombre-display').innerText = user.nombre;
-
-                if(d.last_spell && d.last_spell !== lastProcessedSpell) {
-                    let p = d.last_spell.split(':');
-                    if(p[0] !== user.nombre) efectoImpacto(p[1], p[2], p[3]);
-                    lastProcessedSpell = d.last_spell;
+                if(d.last_spell && d.last_spell.split(':')[0] !== user.nombre) {
+                    let p = d.last_spell.split(':'); efectoImpacto(p[1], p[2], p[3]);
                 }
-
                 miTurno = (d.turno === miRol);
                 document.getElementById('turno-txt').innerText = miTurno ? "TU TURNO" : "RIVAL...";
-                document.getElementById('spell-menu').style.opacity = miTurno ? "1" : "0.3";
                 if(miHP <= 0) fin(false); if(enHP <= 0 && d.p2_n !== "Buscando...") fin(true);
             }
         }, 1000);
     }
 
-    async function atacar(n, dmgBase) {
+    async function atacar(n, db) {
         if(!miTurno) return; miTurno = false;
-        
-        let suerte = Math.random();
-        let finalDmg = 0;
-        let msg = "";
-
-        if(suerte < 0.15) { // Fallo
-            finalDmg = 0; msg = "FALLO"; sonar(200, 'sine');
-        } else {
-            let mult = Math.random() * (1.5 - 0.5) + 0.5; // Entre 50% y 150%
-            finalDmg = Math.floor((dmgBase + (user.lvl * 20)) * mult);
-            if(suerte > 0.90) { finalDmg *= 2; msg = "CRÍTICO"; sonar(800, 'sawtooth'); }
-            else { msg = "HIT"; sonar(500, 'triangle'); }
+        let s = Math.random();
+        let fd = 0, msg = "";
+        if(s < 0.20) { fd = 0; msg = "MISS"; sonar(150,'sine'); }
+        else {
+            let mult = Math.random() * (1.5 - 0.5) + 0.5;
+            fd = Math.floor((db + (user.lvl * 50)) * mult);
+            if(s > 0.90) { fd *= 2.5; msg = "CRÍTICO"; sonar(800,'sawtooth'); }
+            else { msg = "HIT"; sonar(400,'triangle'); }
         }
-
         if(esBot) {
-            botHP -= finalDmg; addLog(`Lanzaste ${n}: ${msg} (${finalDmg})`, 'var(--green)');
-            actualizarBarrasBot();
+            botHP -= fd; addLog(`Lanzaste ${n}: ${msg} (${fd})`, 'var(--green)'); actualizarBarrasBot();
             if(botHP <= 0) return fin(true);
             setTimeout(() => {
-                let dBot = (20 * user.lvl) * (Math.random() + 0.5);
-                miHPBot -= dBot; efectoImpacto("Hechizo Bot", Math.floor(dBot), "HIT");
-                actualizarBarrasBot();
+                let dbot = (40 * user.lvl) * (Math.random()+0.5); miHPBot -= dbot;
+                efectoImpacto("Enemigo", Math.floor(dbot), "HIT"); actualizarBarrasBot();
                 if(miHPBot <= 0) fin(false); else miTurno = true;
             }, 1000);
         } else {
-            const r = await fetch(`${DB_BASE}/salas/${salaId}.json`);
-            const d = await r.json();
+            const r = await fetch(`${DB_BASE}/salas/${salaId}.json`); const d = await r.json();
             const target = miRol === 'p1' ? 'p2_hp' : 'p1_hp';
             await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ 
-                [target]: Math.max(0, (miRol==='p1'?d.p2_hp:d.p1_hp) - finalDmg), 
-                turno: miRol==='p1'?'p2':'p1',
-                last_spell: user.nombre + ":" + n + ":" + finalDmg + ":" + msg + ":" + Date.now()
+                [target]: Math.max(0, (miRol==='p1'?d.p2_hp:d.p1_hp) - fd), 
+                turno: miRol==='p1'?'p2':'p1', last_spell: user.nombre+":"+n+":"+fd+":"+msg+":"+Date.now()
             })});
-            addLog(`Lanzaste ${n}: ${msg} (-${finalDmg})`, 'var(--green)');
         }
     }
 
     function efectoImpacto(h, d, m) {
-        document.getElementById('arena').classList.add('shake');
-        sonar(100, 'square');
+        document.getElementById('arena').classList.add('shake'); sonar(100,'square');
         const a = document.getElementById('spell-alert');
-        a.innerHTML = `<span style="color:white; font-size:15px;">${h}</span><br><b style="color:var(--red)">${m} -${d}</b>`;
-        a.style.display = 'block';
-        addLog(`Recibes ${h}: ${m} (-${d} HP)`, 'var(--red)');
-        setTimeout(() => { document.getElementById('arena').classList.remove('shake'); a.style.display='none'; }, 1000);
+        a.innerHTML = `<b style="color:var(--red)">${m} -${d}</b>`; a.style.display = 'block';
+        setTimeout(() => { document.getElementById('arena').classList.remove('shake'); a.style.display='none'; }, 800);
     }
 
     function dueloBot() {
@@ -267,15 +269,16 @@
     function cargarHechizosMenu() {
         const m = document.getElementById('spell-menu'); m.innerHTML = "";
         HECHIZOS.filter(h => h.lvl <= user.lvl).reverse().forEach(h => {
-            m.innerHTML += `<button class="btn" onclick="atacar('${h.n}', ${h.dmg})">${h.n.toUpperCase()}</button>`;
+            m.innerHTML += `<button class="btn" style="${h.c?'border-color:var(--purple)':''}" onclick="atacar('${h.n}', ${h.d})">${h.n.toUpperCase()}</button>`;
         });
     }
 
     async function fin(win) {
         clearInterval(loop); alert(win ? "¡VICTORIA!" : "DERROTA");
-        user.xp += win ? 500 : 100;
-        while(user.xp >= (user.lvl * 400)) { 
-            user.xp -= (user.lvl * 400); user.lvl++; user.hpMax += 200; 
+        user.xp += win ? 1000 : 200;
+        // CURVA HARDCORE: Nivel * 1000 de XP necesaria
+        while(user.xp >= (user.lvl * 1000)) { 
+            user.xp -= (user.lvl * 1000); user.lvl++; user.hpMax += 500; 
             user.liga = getLiga(user.lvl);
         }
         await fetch(`${DB_BASE}/usuarios/${user.nombre}.json`, { method: 'PUT', body: JSON.stringify(user) });
@@ -284,7 +287,6 @@
 
     function addLog(m, c) { const l = document.getElementById('log'); l.innerHTML = `<div style="color:${c}">> ${m}</div>` + l.innerHTML; }
     function cambiarPantalla(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('p-'+id).classList.add('active'); }
-    function cerrarSesion() { localStorage.removeItem('mago_sesion'); location.reload(); }
 
     (async () => {
         const s = localStorage.getItem('mago_sesion');
