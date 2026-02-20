@@ -2,185 +2,198 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Arena de Duelos - Hogwarts Orión</title>
+    <title>Academia de Duelos - Hogwarts Orión</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Special+Elite&display=swap');
+        body { background: #0a0a0a; color: #f4e4bc; font-family: 'Special Elite', cursive; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .arena-container { background: rgba(20, 15, 10, 0.95); width: 95%; max-width: 700px; padding: 30px; border: 2px solid #5c4021; border-radius: 15px; text-align: center; }
+        
+        /* ACADEMIA STATS */
+        .stats-bar { display: flex; justify-content: space-around; background: #2c1e11; padding: 10px; border: 1px solid gold; margin-bottom: 20px; font-family: 'Cinzel'; font-size: 14px; }
+        .lvl-up { color: #2ecc71; font-weight: bold; }
 
-        /* --- ESTILOS DE INMERSIÓN --- */
-        body {
-            margin: 0; padding: 0;
-            background: #0a0a0a url('https://www.transparenttextures.com/patterns/dark-matter.png');
-            color: #f4e4bc; font-family: 'Special Elite', cursive;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 100vh; overflow: hidden;
-            transition: background-color 0.1s ease; /* Para el efecto flash */
-        }
+        /* BARRAS DE VIDA */
+        .hp-container { margin: 15px 0; }
+        .hp-bar { background: #222; height: 25px; border: 1px solid gold; border-radius: 12px; overflow: hidden; position: relative; }
+        .hp-fill { height: 100%; transition: width 0.4s ease; }
+        #hp-mi-fill { background: linear-gradient(90deg, #27ae60, #2ecc71); }
+        #hp-en-fill { background: linear-gradient(90deg, #c0392b, #e74c3c); }
+        
+        .btn { background: #1a150f; color: #d4af37; border: 1px solid #d4af37; padding: 15px; cursor: pointer; font-family: 'Cinzel'; width: 100%; margin: 5px 0; font-size: 16px; transition: 0.3s; }
+        .btn:hover:not(:disabled) { background: #d4af37; color: #1a150f; }
+        .btn:disabled { opacity: 0.3; cursor: wait; }
 
-        .arena-box {
-            background: rgba(20, 15, 10, 0.95);
-            width: 90%; max-width: 800px; padding: 40px;
-            border: 2px solid #5c4021; border-radius: 15px;
-            box-shadow: 0 0 50px rgba(0,0,0,1), 0 0 20px rgba(212, 175, 55, 0.2);
-            text-align: center; position: relative;
-        }
-
-        h1 { font-family: 'Cinzel', serif; font-size: clamp(30px, 6vw, 50px); color: #d4af37; margin: 0; text-shadow: 0 0 15px rgba(212, 175, 55, 0.5); }
-        .sub-header { font-size: 12px; letter-spacing: 4px; color: #888; margin-bottom: 30px; }
-
-        /* --- SELECCIÓN DE RIVAL --- */
-        #selector-rival { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
-        .card-rival {
-            background: #1a150f; border: 1px solid #5c4021; padding: 20px; cursor: pointer; border-radius: 8px; transition: 0.3s;
-        }
-        .card-rival:hover { border-color: #d4af37; transform: scale(1.05); background: #2c1e11; }
-        .card-rival h3 { font-family: 'Cinzel'; margin: 0; color: #d4af37; }
-
-        /* --- ESCENARIO DE DUELO --- */
-        #escenario { display: none; }
-        .stats-container { display: flex; justify-content: space-between; align-items: center; margin: 30px 0; }
-        .wizard-stats { width: 40%; }
-        .hp-bg { background: #222; height: 20px; width: 100%; border-radius: 10px; border: 1px solid #d4af37; overflow: hidden; margin-top: 5px; }
-        .hp-fill { height: 100%; width: 100%; transition: width 0.4s ease; background: linear-gradient(90deg, #2ecc71, #27ae60); }
-        .hp-enemy { background: linear-gradient(90deg, #e74c3c, #c0392b); }
-
-        /* --- HECHIZOS --- */
-        .spell-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        .spell-btn {
-            background: #1a150f; border: 1px solid #5c4021; color: #f4e4bc;
-            padding: 15px; cursor: pointer; font-family: 'Cinzel'; border-radius: 5px; transition: 0.2s;
-        }
-        .spell-btn:hover { background: #d4af37; color: #1a150f; border-color: #fff; }
-
-        /* --- REGISTRO --- */
-        #log {
-            height: 100px; overflow-y: auto; background: #000; border: 1px solid #333;
-            margin-top: 20px; padding: 15px; font-size: 14px; text-align: left; color: #d4af37;
-        }
-        .btn-restart { display: none; margin-top: 20px; background: #740001; color: white; border: none; padding: 10px 20px; cursor: pointer; font-family: 'Cinzel'; }
-
+        #log { height: 100px; overflow-y: auto; background: #000; border: 1px solid #333; margin-top: 15px; padding: 10px; font-size: 13px; text-align: left; }
+        .screen { display: none; }
+        .active { display: block; }
     </style>
 </head>
 <body>
 
-<div class="arena-box" id="main-box">
-    <h1>CLUB DE DUELO</h1>
-    <div class="sub-header">HOGWARTS ORIÓN</div>
-
-    <div id="selector-rival">
-        <div class="card-rival" onclick="iniciarDuelo('Estudiante', 100, 10, 20)">
-            <h3>ESTUDIANTE</h3>
-            <small>Fácil - 100 PV</small>
-        </div>
-        <div class="card-rival" onclick="iniciarDuelo('Profesor', 150, 20, 35)">
-            <h3>PROFESOR</h3>
-            <small>Normal - 150 PV</small>
-        </div>
-        <div class="card-rival" onclick="iniciarDuelo('Mortífago', 220, 30, 50)">
-            <h3>MORTÍFAGO</h3>
-            <small>DIFÍCIL - 220 PV</small>
-        </div>
+<div class="arena-container">
+    <h1 style="font-family:'Cinzel'; margin:0;">ACADEMIA DE DUELOS</h1>
+    <div class="stats-bar">
+        <span>NIVEL: <b id="stat-lvl">1</b></span>
+        <span>XP: <b id="stat-xp">0/100</b></span>
+        <span>VIDA MAX: <b id="stat-hp">100</b></span>
     </div>
 
-    <div id="escenario">
-        <div class="stats-container">
-            <div class="wizard-stats">
-                <div id="p-name">TÚ</div>
-                <div class="hp-bg"><div id="hp-p" class="hp-fill"></div></div>
-                <small id="txt-p">100 / 100 PV</small>
-            </div>
-            <div style="font-family: 'Cinzel'; color: #d4af37; font-size: 24px;">VS</div>
-            <div class="wizard-stats">
-                <div id="e-name">RIVAL</div>
-                <div class="hp-bg"><div id="hp-e" class="hp-fill hp-enemy"></div></div>
-                <small id="txt-e">100 / 100 PV</small>
-            </div>
+    <div id="pantalla-lobby" class="screen active">
+        <p>¿Listo para probar tu magia contra otros?</p>
+        <button class="btn" onclick="buscarPartida()">BUSCAR DUELO 1VS1 (ALEATORIO) ⚔️</button>
+        <small style="color:#888;">El sistema te emparejará con alguien en línea.</small>
+    </div>
+
+    <div id="pantalla-buscando" class="screen">
+        <h2 class="lvl-up">Buscando oponente...</h2>
+        <div class="loader">🪄 Lanzando encantamiento de búsqueda...</div>
+    </div>
+
+    <div id="pantalla-duelo" class="screen">
+        <div class="hp-container">
+            <small id="en-nombre">RIVAL</small>
+            <div class="hp-bar"><div id="hp-en-fill" class="hp-fill" style="width: 100%;"></div></div>
+        </div>
+        
+        <div style="font-family:'Cinzel'; font-size:20px; color:gold;">VS</div>
+
+        <div class="hp-container">
+            <small>TÚ (VIDA)</small>
+            <div class="hp-bar"><div id="hp-mi-fill" class="hp-fill" style="width: 100%;"></div></div>
         </div>
 
-        <div id="controles">
-            <div class="spell-grid">
-                <button class="spell-btn" onclick="lanzar('Expelliarmus', 15, 25)">⚡ EXPELLIARMUS</button>
-                <button class="spell-btn" onclick="lanzar('Desmaius', 20, 35)">💫 DESMAIUS</button>
-                <button class="spell-btn" onclick="lanzar('Rictusempra', 10, 40)">😂 RICTUSEMPRA</button>
-                <button class="spell-btn" onclick="lanzar('Sectumsempra', 30, 55)">🩸 SECTUMSEMPRA</button>
-            </div>
-        </div>
-
-        <div id="log">Varitas listas... ¡Que comience el duelo!</div>
-        <button id="btn-retry" class="btn-restart" onclick="location.reload()">VOLVER A LA ACADEMIA 🔄</button>
+        <div id="turno-txt" style="margin-bottom:10px; color:gold;">Esperando...</div>
+        <button id="btn-atk" class="btn" onclick="atacar()">⚡ EXPELLIARMUS</button>
+        
+        <div id="log"></div>
     </div>
 </div>
 
-<audio id="snd-spell" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
-<audio id="snd-hit" src="https://assets.mixkit.co/active_storage/sfx/1655/1655-preview.mp3"></audio>
-<audio id="snd-win" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
-
 <script>
-    let pHP = 100, eHP = 100, pMax = 100, eMax = 100;
-    let minE = 10, maxE = 20;
-    let turnLock = false;
+    // --- CONFIGURACIÓN FIREBASE (Usa la tuya) ---
+    const DB_URL = "https://profeta-9c8df-default-rtdb.firebaseio.com/lobby.json";
+    const GAME_URL = "https://profeta-9c8df-default-rtdb.firebaseio.com/salas";
 
-    function iniciarDuelo(nombre, hp, dMin, dMax) {
-        eMax = hp; eHP = hp;
-        minE = dMin; maxE = dMax;
-        document.getElementById('e-name').innerText = nombre;
-        document.getElementById('txt-e').innerText = `${hp} / ${hp} PV`;
-        document.getElementById('selector-rival').style.display = 'none';
-        document.getElementById('escenario').style.display = 'block';
+    // --- SISTEMA DE ACADEMIA (NIVELACIÓN) ---
+    let miData = JSON.parse(localStorage.getItem('mago_stats')) || { lvl: 1, xp: 0, hpMax: 100, dañoBase: 15 };
+
+    function guardarProgreso() {
+        localStorage.setItem('mago_stats', JSON.stringify(miData));
+        document.getElementById('stat-lvl').innerText = miData.lvl;
+        document.getElementById('stat-xp').innerText = `${miData.xp}/${miData.lvl * 100}`;
+        document.getElementById('stat-hp').innerText = miData.hpMax;
     }
 
-    function lanzar(hechizo, min, max) {
-        if(turnLock || pHP <= 0 || eHP <= 0) return;
-        turnLock = true;
+    function ganarXP(cantidad) {
+        miData.xp += cantidad;
+        if(miData.xp >= miData.lvl * 100) {
+            miData.lvl++;
+            miData.xp = 0;
+            miData.hpMax += 20; // Sube 20 de vida por nivel
+            miData.dañoBase += 5; // Sube 5 de daño por nivel
+            alert("¡SUBISTE DE NIVEL! Ahora eres Nivel " + miData.lvl);
+        }
+        guardarProgreso();
+    }
 
-        // Turno Jugador
-        document.getElementById('snd-spell').play();
-        efectoVisual('rgba(212, 175, 55, 0.2)'); // Flash Dorado
+    // --- LÓGICA DE MATCHMAKING ---
+    let salaId = null;
+    let miRol = ""; // "p1" o "p2"
+    let intervalEscucha = null;
+
+    async function buscarPartida() {
+        cambiarPantalla('buscando');
         
-        let dmg = Math.floor(Math.random() * (max - min + 1)) + min;
-        eHP -= dmg;
-        addLog(`🪄 Has lanzado <b>${hechizo}</b>. ¡Impacto de ${dmg} PV!`);
-        actualizarBarras();
+        const res = await fetch(DB_URL);
+        const lobby = await res.json();
 
-        if(eHP <= 0) return finalizar("¡VICTORIA! El rival ha sido derrotado.");
-
-        // Turno Enemigo
-        setTimeout(() => {
-            document.getElementById('snd-hit').play();
-            efectoVisual('rgba(255, 0, 0, 0.2)'); // Flash Rojo de daño
-            
-            let dmgE = Math.floor(Math.random() * (maxE - minE + 1)) + minE;
-            pHP -= dmgE;
-            addLog(`🔥 El rival contraataca. Pierdes ${dmgE} PV.`);
-            actualizarBarras();
-
-            if(pHP <= 0) finalizar("DERROTA. Has caído en el duelo.");
-            else turnLock = false;
-        }, 1000);
+        if(!lobby) {
+            // No hay nadie esperando, creo una sala
+            salaId = "sala_" + Date.now();
+            miRol = "p1";
+            await fetch(DB_URL, { method: 'PUT', body: JSON.stringify({ salaId }) });
+            await fetch(`${GAME_URL}/${salaId}.json`, { method: 'PUT', body: JSON.stringify({
+                p1_hp: miData.hpMax, p2_hp: 0, turno: "p1", status: "esperando", p1_max: miData.hpMax
+            })});
+        } else {
+            // Hay alguien esperando, me uno
+            salaId = lobby.salaId;
+            miRol = "p2";
+            await fetch(DB_URL, { method: 'DELETE' }); // Limpio el lobby
+            await fetch(`${GAME_URL}/${salaId}/p2_hp.json`, { method: 'PUT', body: miData.hpMax });
+            await fetch(`${GAME_URL}/${salaId}/p2_max.json`, { method: 'PUT', body: miData.hpMax });
+            await fetch(`${GAME_URL}/${salaId}/status.json`, { method: 'PUT', body: JSON.stringify("jugando") });
+        }
+        empezarDuelo();
     }
 
-    function actualizarBarras() {
-        document.getElementById('hp-p').style.width = (pHP / pMax * 100) + "%";
-        document.getElementById('hp-e').style.width = (eHP / eMax * 100) + "%";
-        document.getElementById('txt-p').innerText = `${Math.max(0, pHP)} / ${pMax} PV`;
-        document.getElementById('txt-e').innerText = `${Math.max(0, eHP)} / ${eMax} PV`;
+    function empezarDuelo() {
+        cambiarPantalla('duelo');
+        intervalEscucha = setInterval(actualizarEstado, 1000);
+    }
+
+    async function actualizarEstado() {
+        const res = await fetch(`${GAME_URL}/${salaId}.json`);
+        const data = await res.json();
+        if(!data) return;
+
+        let miVida = (miRol === "p1") ? data.p1_hp : data.p2_hp;
+        let vidaEn = (miRol === "p1") ? data.p2_hp : data.p1_hp;
+        let miMax = (miRol === "p1") ? data.p1_max : data.p2_max;
+        let enMax = (miRol === "p1") ? data.p2_max : data.p1_max;
+
+        document.getElementById('hp-mi-fill').style.width = (miVida / miMax * 100) + "%";
+        document.getElementById('hp-en-fill').style.width = (vidaEn / enMax * 100) + "%";
+        
+        if(data.status === "esperando") {
+            document.getElementById('turno-txt').innerText = "Esperando oponente...";
+            document.getElementById('btn-atk').disabled = true;
+        } else {
+            let esMiTurno = (data.turno === miRol);
+            document.getElementById('btn-atk').disabled = !esMiTurno;
+            document.getElementById('turno-txt').innerText = esMiTurno ? "¡TU TURNO!" : "Oponente pensando...";
+            
+            if(miVida <= 0) finalizar(false);
+            if(vidaEn <= 0 && data.p2_max > 0) finalizar(true);
+        }
+    }
+
+    async function atacar() {
+        let daño = Math.floor(Math.random() * 10) + miData.dañoBase;
+        const res = await fetch(`${GAME_URL}/${salaId}.json`);
+        const data = await res.json();
+        
+        let nuevaVidaEn = (miRol === "p1" ? data.p2_hp : data.p1_hp) - daño;
+        let update = {};
+        update[miRol === "p1" ? "p2_hp" : "p1_hp"] = Math.max(0, nuevaVidaEn);
+        update["turno"] = (miRol === "p1" ? "p2" : "p1");
+
+        await fetch(`${GAME_URL}/${salaId}.json`, { method: 'PATCH', body: JSON.stringify(update) });
+        addLog(`✨ Lanzaste un hechizo de ${daño} de daño.`);
+    }
+
+    function finalizar(victoria) {
+        clearInterval(intervalEscucha);
+        if(victoria) {
+            alert("¡VICTORIA! Ganaste 50 XP");
+            ganarXP(50);
+        } else {
+            alert("Derrota. Ganaste 10 XP por el esfuerzo.");
+            ganarXP(10);
+        }
+        location.reload();
+    }
+
+    function cambiarPantalla(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('pantalla-' + id).classList.add('active');
     }
 
     function addLog(m) {
-        const l = document.getElementById('log');
-        l.innerHTML = `<div>${m}</div>` + l.innerHTML;
+        document.getElementById('log').innerHTML = `<div>${m}</div>` + document.getElementById('log').innerHTML;
     }
 
-    function efectoVisual(color) {
-        document.body.style.backgroundColor = color;
-        setTimeout(() => document.body.style.backgroundColor = "#0a0a0a", 100);
-    }
-
-    function finalizar(m) {
-        document.getElementById('snd-win').play();
-        addLog(`<h2 style="color:gold">${m}</h2>`);
-        document.getElementById('controles').style.display = 'none';
-        document.getElementById('btn-retry').style.display = 'block';
-    }
+    guardarProgreso();
 </script>
 
 </body>
