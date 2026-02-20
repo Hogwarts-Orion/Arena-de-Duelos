@@ -6,16 +6,15 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Special+Elite&display=swap');
         body { background: #0a0a0a; color: #f4e4bc; font-family: 'Special Elite', cursive; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .arena-container { background: rgba(20, 15, 10, 0.95); width: 95%; max-width: 700px; padding: 30px; border: 2px solid #5c4021; border-radius: 15px; text-align: center; }
+        .arena-container { background: rgba(20, 15, 10, 0.95); width: 95%; max-width: 700px; padding: 30px; border: 2px solid #5c4021; border-radius: 15px; text-align: center; box-shadow: 0 0 30px black; }
         
         /* ACADEMIA STATS */
         .stats-bar { display: flex; justify-content: space-around; background: #2c1e11; padding: 10px; border: 1px solid gold; margin-bottom: 20px; font-family: 'Cinzel'; font-size: 14px; }
-        .lvl-up { color: #2ecc71; font-weight: bold; }
+        .lvl-up { color: #2ecc71; text-shadow: 0 0 10px #2ecc71; }
 
         /* BARRAS DE VIDA */
-        .hp-container { margin: 15px 0; }
-        .hp-bar { background: #222; height: 25px; border: 1px solid gold; border-radius: 12px; overflow: hidden; position: relative; }
-        .hp-fill { height: 100%; transition: width 0.4s ease; }
+        .hp-bar { background: #222; height: 25px; border: 1px solid gold; border-radius: 12px; overflow: hidden; margin: 10px 0; }
+        .hp-fill { height: 100%; transition: width 0.4s ease; width: 100%; }
         #hp-mi-fill { background: linear-gradient(90deg, #27ae60, #2ecc71); }
         #hp-en-fill { background: linear-gradient(90deg, #c0392b, #e74c3c); }
         
@@ -23,7 +22,7 @@
         .btn:hover:not(:disabled) { background: #d4af37; color: #1a150f; }
         .btn:disabled { opacity: 0.3; cursor: wait; }
 
-        #log { height: 100px; overflow-y: auto; background: #000; border: 1px solid #333; margin-top: 15px; padding: 10px; font-size: 13px; text-align: left; }
+        #log { height: 100px; overflow-y: auto; background: #000; border: 1px solid #333; margin-top: 15px; padding: 10px; font-size: 13px; text-align: left; color: #d4af37; }
         .screen { display: none; }
         .active { display: block; }
     </style>
@@ -31,7 +30,7 @@
 <body>
 
 <div class="arena-container">
-    <h1 style="font-family:'Cinzel'; margin:0;">ACADEMIA DE DUELOS</h1>
+    <h1 style="font-family:'Cinzel'; color:gold;">ACADEMIA DE DUELOS</h1>
     <div class="stats-bar">
         <span>NIVEL: <b id="stat-lvl">1</b></span>
         <span>XP: <b id="stat-xp">0/100</b></span>
@@ -39,149 +38,175 @@
     </div>
 
     <div id="pantalla-lobby" class="screen active">
-        <p>¿Listo para probar tu magia contra otros?</p>
-        <button class="btn" onclick="buscarPartida()">BUSCAR DUELO 1VS1 (ALEATORIO) ⚔️</button>
-        <small style="color:#888;">El sistema te emparejará con alguien en línea.</small>
+        <p>¿Qué camino eliges hoy, mago?</p>
+        <button class="btn" onclick="buscarPartida()">BUSCAR DUELO ONLINE (1VS1) ⚔️</button>
+        <button class="btn" style="border-color:#2ecc71; color:#2ecc71;" onclick="entrenamiento()">ENTRENAR EN LA ACADEMIA (BOT) 🎓</button>
+        <small style="color:#888;">El entrenamiento te da menos XP pero te ayuda a subir de nivel.</small>
     </div>
 
     <div id="pantalla-buscando" class="screen">
         <h2 class="lvl-up">Buscando oponente...</h2>
-        <div class="loader">🪄 Lanzando encantamiento de búsqueda...</div>
+        <p>Invocando un rival digno desde el Ministerio...</p>
+        <button class="btn" onclick="location.reload()">CANCELAR</button>
     </div>
 
     <div id="pantalla-duelo" class="screen">
-        <div class="hp-container">
-            <small id="en-nombre">RIVAL</small>
-            <div class="hp-bar"><div id="hp-en-fill" class="hp-fill" style="width: 100%;"></div></div>
+        <div id="rival-info">
+            <small id="en-nombre">CARGANDO RIVAL...</small>
+            <div class="hp-bar"><div id="hp-en-fill" class="hp-fill"></div></div>
         </div>
-        
         <div style="font-family:'Cinzel'; font-size:20px; color:gold;">VS</div>
-
-        <div class="hp-container">
+        <div id="mi-info">
             <small>TÚ (VIDA)</small>
-            <div class="hp-bar"><div id="hp-mi-fill" class="hp-fill" style="width: 100%;"></div></div>
+            <div class="hp-bar"><div id="hp-mi-fill" class="hp-fill"></div></div>
         </div>
-
-        <div id="turno-txt" style="margin-bottom:10px; color:gold;">Esperando...</div>
-        <button id="btn-atk" class="btn" onclick="atacar()">⚡ EXPELLIARMUS</button>
-        
+        <div id="turno-txt" style="margin-bottom:10px; color:gold;">Conectando hechizos...</div>
+        <div id="hechizos-grid">
+            <button id="btn-atk" class="btn" onclick="atacar()">⚡ EXPELLIARMUS</button>
+        </div>
         <div id="log"></div>
     </div>
 </div>
 
 <script>
-    // --- CONFIGURACIÓN FIREBASE (Usa la tuya) ---
-    const DB_URL = "https://profeta-9c8df-default-rtdb.firebaseio.com/lobby.json";
-    const GAME_URL = "https://profeta-9c8df-default-rtdb.firebaseio.com/salas";
+    // --- TU FIREBASE CONFIGURADA ---
+    const DB_BASE = "https://duelos-af899-default-rtdb.firebaseio.com";
+    const LOBBY_URL = `${DB_BASE}/lobby.json`;
+    const SALAS_URL = `${DB_BASE}/salas`;
 
-    // --- SISTEMA DE ACADEMIA (NIVELACIÓN) ---
-    let miData = JSON.parse(localStorage.getItem('mago_stats')) || { lvl: 1, xp: 0, hpMax: 100, dañoBase: 15 };
+    // --- STATS ACADEMIA ---
+    let miData = JSON.parse(localStorage.getItem('mago_stats_orion')) || { lvl: 1, xp: 0, hpMax: 100, dmg: 15 };
+    let salaId = null;
+    let miRol = "";
+    let loop = null;
+    let esBot = false;
 
-    function guardarProgreso() {
-        localStorage.setItem('mago_stats', JSON.stringify(miData));
+    function guardar() {
+        localStorage.setItem('mago_stats_orion', JSON.stringify(miData));
         document.getElementById('stat-lvl').innerText = miData.lvl;
         document.getElementById('stat-xp').innerText = `${miData.xp}/${miData.lvl * 100}`;
         document.getElementById('stat-hp').innerText = miData.hpMax;
     }
 
-    function ganarXP(cantidad) {
-        miData.xp += cantidad;
-        if(miData.xp >= miData.lvl * 100) {
-            miData.lvl++;
-            miData.xp = 0;
-            miData.hpMax += 20; // Sube 20 de vida por nivel
-            miData.dañoBase += 5; // Sube 5 de daño por nivel
-            alert("¡SUBISTE DE NIVEL! Ahora eres Nivel " + miData.lvl);
-        }
-        guardarProgreso();
-    }
-
-    // --- LÓGICA DE MATCHMAKING ---
-    let salaId = null;
-    let miRol = ""; // "p1" o "p2"
-    let intervalEscucha = null;
-
+    // --- MATCHMAKING ONLINE ---
     async function buscarPartida() {
+        esBot = false;
         cambiarPantalla('buscando');
-        
-        const res = await fetch(DB_URL);
+        const res = await fetch(LOBBY_URL);
         const lobby = await res.json();
 
         if(!lobby) {
-            // No hay nadie esperando, creo una sala
             salaId = "sala_" + Date.now();
             miRol = "p1";
-            await fetch(DB_URL, { method: 'PUT', body: JSON.stringify({ salaId }) });
-            await fetch(`${GAME_URL}/${salaId}.json`, { method: 'PUT', body: JSON.stringify({
-                p1_hp: miData.hpMax, p2_hp: 0, turno: "p1", status: "esperando", p1_max: miData.hpMax
+            await fetch(LOBBY_URL, { method: 'PUT', body: JSON.stringify({ salaId }) });
+            await fetch(`${SALAS_URL}/${salaId}.json`, { method: 'PUT', body: JSON.stringify({
+                p1_hp: miData.hpMax, p2_hp: 0, p1_max: miData.hpMax, p2_max: 0, turno: "p1", status: "esperando"
             })});
         } else {
-            // Hay alguien esperando, me uno
             salaId = lobby.salaId;
             miRol = "p2";
-            await fetch(DB_URL, { method: 'DELETE' }); // Limpio el lobby
-            await fetch(`${GAME_URL}/${salaId}/p2_hp.json`, { method: 'PUT', body: miData.hpMax });
-            await fetch(`${GAME_URL}/${salaId}/p2_max.json`, { method: 'PUT', body: miData.hpMax });
-            await fetch(`${GAME_URL}/${salaId}/status.json`, { method: 'PUT', body: JSON.stringify("jugando") });
+            await fetch(LOBBY_URL, { method: 'DELETE' });
+            await fetch(`${SALAS_URL}/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({
+                p2_hp: miData.hpMax, p2_max: miData.hpMax, status: "jugando"
+            })});
         }
-        empezarDuelo();
+        empezarLoop();
     }
 
-    function empezarDuelo() {
+    // --- ENTRENAMIENTO (BOT) ---
+    let botHP = 80;
+    function entrenamiento() {
+        esBot = true;
+        botHP = 70 + (miData.lvl * 10);
         cambiarPantalla('duelo');
-        intervalEscucha = setInterval(actualizarEstado, 1000);
+        document.getElementById('en-nombre').innerText = "PROFESOR DE DUELOS (BOT)";
+        document.getElementById('turno-txt').innerText = "¡TU TURNO!";
+        actualizarBarrasBot();
     }
 
-    async function actualizarEstado() {
-        const res = await fetch(`${GAME_URL}/${salaId}.json`);
-        const data = await res.json();
-        if(!data) return;
+    // --- LÓGICA DE COMBATE ---
+    function empezarLoop() {
+        cambiarPantalla('duelo');
+        loop = setInterval(async () => {
+            const r = await fetch(`${SALAS_URL}/${salaId}.json`);
+            const d = await r.json();
+            if(!d) return;
 
-        let miVida = (miRol === "p1") ? data.p1_hp : data.p2_hp;
-        let vidaEn = (miRol === "p1") ? data.p2_hp : data.p1_hp;
-        let miMax = (miRol === "p1") ? data.p1_max : data.p2_max;
-        let enMax = (miRol === "p1") ? data.p2_max : data.p1_max;
+            let vidaYo = (miRol === 'p1') ? d.p1_hp : d.p2_hp;
+            let vidaEn = (miRol === 'p1') ? d.p2_hp : d.p1_hp;
+            let maxYo = (miRol === 'p1') ? d.p1_max : d.p2_max;
+            let maxEn = (miRol === 'p1') ? d.p2_max : d.p1_max;
 
-        document.getElementById('hp-mi-fill').style.width = (miVida / miMax * 100) + "%";
-        document.getElementById('hp-en-fill').style.width = (vidaEn / enMax * 100) + "%";
-        
-        if(data.status === "esperando") {
-            document.getElementById('turno-txt').innerText = "Esperando oponente...";
-            document.getElementById('btn-atk').disabled = true;
-        } else {
-            let esMiTurno = (data.turno === miRol);
-            document.getElementById('btn-atk').disabled = !esMiTurno;
-            document.getElementById('turno-txt').innerText = esMiTurno ? "¡TU TURNO!" : "Oponente pensando...";
-            
-            if(miVida <= 0) finalizar(false);
-            if(vidaEn <= 0 && data.p2_max > 0) finalizar(true);
-        }
+            document.getElementById('hp-mi-fill').style.width = (vidaYo/maxYo*100) + "%";
+            document.getElementById('hp-en-fill').style.width = (vidaEn/maxEn*100) + "%";
+            document.getElementById('en-nombre').innerText = d.status === "esperando" ? "ESPERANDO RIVAL..." : "MAGO ADVERSARIO";
+
+            if(d.status === "jugando") {
+                let miTurno = d.turno === miRol;
+                document.getElementById('btn-atk').disabled = !miTurno;
+                document.getElementById('turno-txt').innerText = miTurno ? "¡TU TURNO!" : "EL RIVAL CONJUROS...";
+                if(vidaYo <= 0) fin(false);
+                if(vidaEn <= 0) fin(true);
+            }
+        }, 1000);
     }
 
     async function atacar() {
-        let daño = Math.floor(Math.random() * 10) + miData.dañoBase;
-        const res = await fetch(`${GAME_URL}/${salaId}.json`);
-        const data = await res.json();
-        
-        let nuevaVidaEn = (miRol === "p1" ? data.p2_hp : data.p1_hp) - daño;
-        let update = {};
-        update[miRol === "p1" ? "p2_hp" : "p1_hp"] = Math.max(0, nuevaVidaEn);
-        update["turno"] = (miRol === "p1" ? "p2" : "p1");
-
-        await fetch(`${GAME_URL}/${salaId}.json`, { method: 'PATCH', body: JSON.stringify(update) });
-        addLog(`✨ Lanzaste un hechizo de ${daño} de daño.`);
+        let daño = Math.floor(Math.random() * 10) + miData.dmg;
+        if(esBot) {
+            botHP -= daño;
+            addLog(`✨ Golpeaste al Profesor con ${daño} de daño.`);
+            actualizarBarrasBot();
+            if(botHP <= 0) return fin(true);
+            document.getElementById('btn-atk').disabled = true;
+            setTimeout(() => {
+                let dBot = 10 + miData.lvl;
+                miData.hpActual -= dBot; // Simulación local
+                addLog(`🔥 El Profesor te lanza un hechizo de ${dBot} de daño.`);
+                if(miData.hpActual <= 0) fin(false);
+                document.getElementById('btn-atk').disabled = false;
+            }, 1000);
+        } else {
+            const r = await fetch(`${SALAS_URL}/${salaId}.json`);
+            const d = await r.json();
+            let nuevaVidaEn = (miRol === 'p1' ? d.p2_hp : d.p1_hp) - daño;
+            let up = {};
+            up[miRol === 'p1' ? 'p2_hp' : 'p1_hp'] = Math.max(0, nuevaVidaEn);
+            up['turno'] = (miRol === 'p1' ? 'p2' : 'p1');
+            await fetch(`${SALAS_URL}/${salaId}.json`, { method: 'PATCH', body: JSON.stringify(up) });
+            addLog(`⚡ ¡Impactaste con ${daño} de daño!`);
+        }
     }
 
-    function finalizar(victoria) {
-        clearInterval(intervalEscucha);
-        if(victoria) {
-            alert("¡VICTORIA! Ganaste 50 XP");
-            ganarXP(50);
+    function actualizarBarrasBot() {
+        document.getElementById('hp-en-fill').style.width = (botHP / (70+(miData.lvl*10)) * 100) + "%";
+        // En bot usamos vida completa para simplificar la prueba
+        document.getElementById('hp-mi-fill').style.width = "100%"; 
+    }
+
+    function fin(win) {
+        clearInterval(loop);
+        if(win) {
+            let xpGarantizada = esBot ? 25 : 60;
+            alert(`¡VICTORIA! Has ganado ${xpGarantizada} XP`);
+            subirXP(xpGarantizada);
         } else {
-            alert("Derrota. Ganaste 10 XP por el esfuerzo.");
-            ganarXP(10);
+            alert("Has sido derrotado. Ganas 5 XP.");
+            subirXP(5);
         }
         location.reload();
+    }
+
+    function subirXP(puntos) {
+        miData.xp += puntos;
+        if(miData.xp >= miData.lvl * 100) {
+            miData.lvl++;
+            miData.xp = 0;
+            miData.hpMax += 15;
+            miData.dmg += 4;
+            alert("¡NUEVO NIVEL ALCANZADO! Ahora eres Nivel " + miData.lvl);
+        }
+        guardar();
     }
 
     function cambiarPantalla(id) {
@@ -193,8 +218,7 @@
         document.getElementById('log').innerHTML = `<div>${m}</div>` + document.getElementById('log').innerHTML;
     }
 
-    guardarProgreso();
+    guardar();
 </script>
-
 </body>
 </html>
