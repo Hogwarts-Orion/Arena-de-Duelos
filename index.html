@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Academia de Duelos - Turnos Fijos</title>
+    <title>Academia de Duelos - Torneo Épico</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Special+Elite&display=swap');
         body { background: #050505; color: #f4e4bc; font-family: 'Special Elite', cursive; margin: 0; padding: 20px; display: flex; justify-content: center; overflow-x: hidden; }
@@ -21,20 +21,27 @@
         .reg-input { width: 85%; padding: 12px; margin: 8px 0; background: #000; border: 1px solid #5c4021; color: #d4af37; text-align: center; border-radius: 5px; }
         .spell-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 250px; overflow-y: auto; padding: 10px; border: 1px solid #333; border-radius: 10px; background: rgba(0,0,0,0.2); }
         
-        /* Modal PPT Animado */
+        /* Efecto Destello Victoria PPT */
+        @keyframes flashGold {
+            0% { box-shadow: inset 0 0 0 gold; background: #1a150f; }
+            50% { box-shadow: inset 0 0 100px gold; background: #4a3c00; }
+            100% { box-shadow: inset 0 0 0 gold; background: #1a150f; }
+        }
+        .victory-flash { animation: flashGold 1.5s ease-out; }
+
+        /* Modal PPT */
         #p-ppt { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; display: none; flex-direction: column; justify-content: center; align-items: center; border-radius: 15px; }
         .ppt-choice-box { display: flex; gap: 15px; margin-top: 20px; }
         .ppt-card { padding: 20px; border: 2px solid gold; border-radius: 10px; cursor: pointer; transition: 0.3s; background: #1a150f; }
         .ppt-card:hover { transform: scale(1.1); background: gold; color: black; }
         
-        /* Otros elementos */
         .panel-list { height: 250px; overflow-y: auto; text-align: left; font-size: 11px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; border: 1px solid #2c1e11; }
         .ranking-item { display: flex; justify-content: space-between; border-bottom: 1px solid #2c1e11; padding: 5px 0; color: #f4e4bc; }
     </style>
 </head>
 <body>
 
-<div class="arena-container">
+<div class="arena-container" id="main-arena">
     <h1 style="font-family:'Cinzel'; color:gold; margin:0 0 15px 0;">ACADEMIA DE DUELOS</h1>
     
     <div id="p-registro" class="screen">
@@ -97,7 +104,6 @@
 <script>
     const DB_BASE = "https://duelos-af899-default-rtdb.firebaseio.com";
     
-    // HECHIZOS CARGADOS (Ataque, Furtivos, Defensa, Maldiciones)
     const HECHIZOS = [
         { n: "Expelliarmus", lvl: 1, dmg: 15 }, { n: "Incendio", lvl: 4, dmg: 18 },
         { n: "Depulso", lvl: 8, dmg: 21 }, { n: "Offensio", lvl: 12, dmg: 23 },
@@ -173,7 +179,7 @@
 
     async function buscarPartida() {
         playSnd(400, 800, 0.2); yaElegiPPT = false; miTurno = false; cambiarPantalla('duelo');
-        document.getElementById('spell-container').style.display = 'none'; // OCULTAR HECHIZOS AL INICIO
+        document.getElementById('spell-container').style.display = 'none';
         const res = await fetch(`${DB_BASE}/lobby.json`);
         const lobby = await res.json();
         if(!lobby) {
@@ -199,26 +205,21 @@
             document.getElementById('en-nombre-display').innerText = miRol==='p1'?d.p2_n:d.p1_n;
             document.getElementById('mi-nombre-display').innerText = user.nombre;
 
-            // FASE DE SORTEO (PPT)
             if(d.status === "ppt") {
                 document.getElementById('spell-container').style.display = 'none';
                 if(!yaElegiPPT) document.getElementById('p-ppt').style.display = 'flex';
                 if(d.p1_ppt && d.p2_ppt && miRol === 'p1') resolverPPT(d.p1_ppt, d.p2_ppt);
             }
 
-            // FASE DE COMBATE (SOLO SI EL STATUS ES "JUGANDO")
             if(d.status === "jugando") {
                 document.getElementById('p-ppt').style.display = 'none';
-                document.getElementById('spell-container').style.display = 'block'; // MOSTRAR HECHIZOS SOLO AQUÍ
-                
+                document.getElementById('spell-container').style.display = 'block';
                 if(miHP < lastHP) { playSnd(200, 50, 0.3); addLog(`💥 IMPACTO! -${lastHP - miHP} HP`); lastHP = miHP; }
-                
                 miTurno = (d.turno === miRol);
                 document.getElementById('turno-txt').innerText = miTurno ? "TU TURNO ✨" : "ESPERANDO RIVAL...";
                 document.getElementById('turno-txt').style.borderColor = miTurno ? "lime" : "gold";
                 document.getElementById('spell-menu').style.pointerEvents = miTurno ? 'auto' : 'none';
                 document.getElementById('spell-menu').style.opacity = miTurno ? '1' : '0.4';
-
                 if(miHP <= 0) fin(false); if(enHP <= 0) fin(true);
             }
         }, 800);
@@ -238,12 +239,19 @@
         }
         let gana = ((p1==='piedra'&&p2==='tijera')||(p1==='papel'&&p2==='piedra')||(p1==='tijera'&&p2==='papel')) ? "p1" : "p2";
         await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ status: "jugando", turno: gana })});
+        
+        // Efecto destello si el usuario local gana
+        if(miRol === gana) {
+            document.getElementById('main-arena').classList.add('victory-flash');
+            setTimeout(() => document.getElementById('main-arena').classList.remove('victory-flash'), 1500);
+        }
+
         addLog(`🎲 SORTEO: P1 (${p1}) vs P2 (${p2}). Gana turno: ${gana.toUpperCase()}`);
     }
 
     async function atacar(n, dmg) {
-        if(!miTurno) return; // BLOQUEO DE SEGURIDAD EN CLIENTE
-        miTurno = false; // DESACTIVAR INMEDIATAMENTE
+        if(!miTurno) return;
+        miTurno = false;
         playSnd(600, 1200, 0.4);
         let tot = Math.floor((dmg + (user.lvl*3)) * (Math.random()*0.4 + 0.8));
         const r = await fetch(`${DB_BASE}/salas/${salaId}.json`);
