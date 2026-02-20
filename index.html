@@ -2,37 +2,33 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Academia de Duelos - Hogwarts Orión</title>
+    <title>Academia de Duelos - Iniciativa</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Special+Elite&display=swap');
         body { background: #050505; color: #f4e4bc; font-family: 'Special Elite', cursive; margin: 0; padding: 20px; display: flex; justify-content: center; }
         .arena-container { background: #1a150f; width: 100%; max-width: 800px; padding: 25px; border: 2px solid #5c4021; border-radius: 15px; text-align: center; box-shadow: 0 0 50px #000; }
-        
-        /* INTERFAZ */
         .stats-bar { display: flex; justify-content: space-around; background: #2c1e11; padding: 12px; border: 1px solid #d4af37; margin-bottom: 15px; font-family: 'Cinzel'; font-size: 13px; border-radius: 8px; }
         .hp-bar { background: #111; height: 20px; border: 1px solid #d4af37; border-radius: 10px; overflow: hidden; margin: 5px 0; }
         .hp-fill { height: 100%; transition: width 0.3s ease; width: 100%; }
         #hp-mi-fill { background: linear-gradient(90deg, #1b5e20, #4caf50); }
         #hp-en-fill { background: linear-gradient(90deg, #b71c1c, #f44336); }
-        
         .btn { background: #1a150f; color: #d4af37; border: 1px solid #5c4021; padding: 12px; cursor: pointer; font-family: 'Cinzel'; width: 100%; margin: 4px 0; border-radius: 5px; transition: 0.2s; }
         .btn:hover:not(:disabled) { background: #d4af37; color: #1a150f; box-shadow: 0 0 10px gold; }
-        .btn:disabled { opacity: 0.1; cursor: not-allowed; }
-
-        /* GRIMORIO */
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
         .grimorio { margin-top: 30px; text-align: left; background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; border: 1px solid #333; }
         .grimorio h3 { font-family: 'Cinzel'; color: gold; text-align: center; border-bottom: 1px solid #5c4021; padding-bottom: 10px; }
         .spell-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 11px; }
         .spell-item { padding: 5px; border-bottom: 1px solid #222; }
         .unlocked { color: #2ecc71; font-weight: bold; }
         .locked { color: #666; }
-
         .spell-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 200px; overflow-y: auto; padding: 10px; }
-        #log { height: 80px; overflow-y: auto; background: #000; border: 1px solid #2c1e11; margin-top: 10px; padding: 10px; font-size: 12px; color: #d4af37; border-radius: 5px; }
-        
+        #log { height: 100px; overflow-y: auto; background: #000; border: 1px solid #2c1e11; margin-top: 10px; padding: 10px; font-size: 12px; color: #d4af37; border-radius: 5px; }
         .screen { display: none; }
         .active { display: block; }
         .reg-input { width: 85%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #5c4021; color: #d4af37; text-align: center; border-radius: 5px; }
+        
+        /* Modal PPT */
+        #p-ppt { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a150f; border: 3px solid gold; padding: 20px; z-index: 100; border-radius: 15px; display: none; width: 300px; }
     </style>
 </head>
 <body>
@@ -56,11 +52,18 @@
         <h3 id="saludo" style="font-family:'Cinzel'"></h3>
         <button class="btn" onclick="buscarPartida()">DUELO ONLINE ⚔️</button>
         <button class="btn" style="border-color:#b71c1c; color:#f44336;" onclick="entrenamiento()">ENTRENAR (BOT) 💀</button>
-        
         <div class="grimorio">
             <h3>📖 EL GRIMORIO</h3>
             <div id="grimorio-lista" class="spell-list"></div>
         </div>
+    </div>
+
+    <div id="p-ppt">
+        <h3 style="font-family:'Cinzel'; color:gold;">¿Quién empieza?</h3>
+        <p style="font-size: 10px;">Elige tu táctica de sorteo</p>
+        <button class="btn" onclick="elegirPPT('piedra')">💎 Piedra</button>
+        <button class="btn" onclick="elegirPPT('papel')">📜 Papel</button>
+        <button class="btn" onclick="elegirPPT('tijera')">✂️ Tijera</button>
     </div>
 
     <div id="p-duelo" class="screen">
@@ -73,7 +76,6 @@
         <div class="hp-bar"><div id="hp-mi-fill" class="hp-fill"></div></div>
         <div id="spell-menu" class="spell-grid"></div>
         <div id="log"></div>
-        <button class="btn" style="margin-top:10px; font-size:10px; width:auto; padding:5px 15px;" onclick="location.reload()">RENDIRSE / SALIR</button>
     </div>
 </div>
 
@@ -100,12 +102,11 @@
     ];
 
     let user = JSON.parse(localStorage.getItem('duelista_v6'));
-    let salaId, miRol, loop, esBot, botHP, botMaxHP, miHPActual;
+    let salaId, miRol, loop, esBot, botHP, botMaxHP, miHPActual, lastHPConocido;
 
     function registrar() {
-        const nombre = document.getElementById('reg-nombre').value;
+        const nombre = document.getElementById('reg-nombre').value || "Mago";
         const emoji = document.getElementById('reg-emoji').value || "🪄";
-        if(!nombre) return alert("Nombre obligatorio.");
         const uid = "mago_" + Math.random().toString(36).substr(2, 9);
         user = { uid, nombre, emoji, lvl: 1, xp: 0, hpMax: 100 };
         localStorage.setItem('duelista_v6', JSON.stringify(user));
@@ -130,106 +131,118 @@
         HECHIZOS.forEach(h => {
             const isU = h.lvl <= user.lvl;
             list.innerHTML += `<div class="spell-item ${isU ? 'unlocked' : 'locked'}">
-                ${isU ? '✅' : '🔒'} ${h.n} ${isU ? '' : '(Nvl ' + h.lvl + ')'}
+                ${isU ? '✅' : '🔒'} ${h.n} ${isU ? '' : '(Lvl ' + h.lvl + ')'}
             </div>`;
         });
     }
 
-    // --- CONECTOR ONLINE CORREGIDO ---
     async function buscarPartida() {
         esBot = false;
         cambiarPantalla('duelo');
         document.getElementById('turno-txt').innerText = "CONECTANDO...";
-        
-        try {
-            const res = await fetch(`${DB_BASE}/lobby.json`);
-            const lobby = await res.json();
+        const res = await fetch(`${DB_BASE}/lobby.json`);
+        const lobby = await res.json();
 
-            // Si ya estoy en el lobby, espero
-            if(lobby && lobby.uid === user.uid) {
-                salaId = lobby.salaId;
-                miRol = "p1";
-                addLog("Reconectando a tu sala de espera...");
-            } 
-            else if(!lobby) {
-                // Crear sala nueva
-                salaId = "sala_" + Date.now();
-                miRol = "p1";
-                await fetch(`${DB_BASE}/lobby.json`, { method: 'PUT', body: JSON.stringify({ salaId, uid: user.uid }) });
-                await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PUT', body: JSON.stringify({
-                    p1_n: user.nombre, p1_hp: user.hpMax, p1_m: user.hpMax, p2_n: "Buscando...", p2_hp: 0, p2_m: 0, turno: "p1", status: "esperando"
-                })});
-                addLog("Publicando desafío en el Gran Comedor...");
-            } else {
-                // Unirse a sala existente
-                salaId = lobby.salaId;
-                miRol = "p2";
-                await fetch(`${DB_BASE}/lobby.json`, { method: 'DELETE' });
-                await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({
-                    p2_n: user.nombre, p2_hp: user.hpMax, p2_m: user.hpMax, status: "jugando"
-                })});
-                addLog("¡Oponente encontrado! Iniciando duelo...");
-            }
-            empezarLoop();
-        } catch(e) {
-            alert("Error de conexión con el Ministerio.");
-            location.reload();
+        if(!lobby) {
+            salaId = "sala_" + Date.now();
+            miRol = "p1";
+            await fetch(`${DB_BASE}/lobby.json`, { method: 'PUT', body: JSON.stringify({ salaId, uid: user.uid }) });
+            await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PUT', body: JSON.stringify({
+                p1_n: user.nombre, p1_hp: user.hpMax, p1_m: user.hpMax, p2_n: "Buscando...", p2_hp: 0, p2_m: 0, status: "esperando",
+                p1_ppt: "", p2_ppt: "", turno: "none"
+            })});
+        } else {
+            salaId = lobby.salaId;
+            miRol = "p2";
+            await fetch(`${DB_BASE}/lobby.json`, { method: 'DELETE' });
+            await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({
+                p2_n: user.nombre, p2_hp: user.hpMax, p2_m: user.hpMax, status: "ppt"
+            })});
         }
+        lastHPConocido = user.hpMax;
+        empezarLoop();
     }
 
     function empezarLoop() {
         cargarHechizosDuelo();
         loop = setInterval(async () => {
-            try {
-                const r = await fetch(`${DB_BASE}/salas/${salaId}.json`);
-                const d = await r.json();
-                if(!d) return;
+            const r = await fetch(`${DB_BASE}/salas/${salaId}.json`);
+            const d = await r.json();
+            if(!d) return;
 
-                const esP1 = miRol === 'p1';
-                const miHP = esP1 ? d.p1_hp : d.p2_hp;
-                const enHP = esP1 ? d.p2_hp : d.p1_hp;
-                const miM = esP1 ? d.p1_m : d.p2_m;
-                const enM = esP1 ? d.p2_m : d.p1_m;
+            const esP1 = miRol === 'p1';
+            const miHP = esP1 ? d.p1_hp : d.p2_hp;
+            const enHP = esP1 ? d.p2_hp : d.p1_hp;
+            
+            // UI Básica
+            document.getElementById('hp-mi-fill').style.width = (miHP/(esP1?d.p1_m:d.p2_m)*100) + "%";
+            document.getElementById('hp-en-fill').style.width = (enHP/(esP1?d.p2_m:d.p1_m)*100) + "%";
+            document.getElementById('mi-nombre-display').innerText = user.nombre;
+            document.getElementById('en-nombre-display').innerText = esP1 ? d.p2_n : d.p1_n;
 
-                document.getElementById('hp-mi-fill').style.width = (miHP/miM*100) + "%";
-                document.getElementById('hp-en-fill').style.width = (enHP/enM*100) + "%";
-                document.getElementById('mi-nombre-display').innerText = user.nombre;
-                document.getElementById('en-nombre-display').innerText = esP1 ? d.p2_n : d.p1_n;
-
-                if(d.status === "jugando") {
-                    let mt = d.turno === miRol;
-                    document.getElementById('spell-menu').style.pointerEvents = mt ? 'auto' : 'none';
-                    document.getElementById('turno-txt').innerText = mt ? "TU TURNO" : "TURNO RIVAL";
-                    if(miHP <= 0) fin(false);
-                    if(enHP <= 0) fin(true);
-                } else {
-                    document.getElementById('turno-txt').innerText = "ESPERANDO...";
+            // FASE 1: Piedra Papel o Tijera
+            if(d.status === "ppt") {
+                document.getElementById('p-ppt').style.display = 'block';
+                document.getElementById('turno-txt').innerText = "SORTEANDO...";
+                // Verificar si ambos eligieron
+                if(d.p1_ppt && d.p2_ppt) {
+                    document.getElementById('p-ppt').style.display = 'none';
+                    resolverPPT(d.p1_ppt, d.p2_ppt);
                 }
-            } catch(e) { clearInterval(loop); }
+            }
+
+            // FASE 2: Duelo
+            if(d.status === "jugando") {
+                document.getElementById('p-ppt').style.display = 'none';
+                if(miHP < lastHPConocido) {
+                    addLog(`💥 Recibiste un impacto (-${lastHPConocido - miHP} HP)`);
+                    lastHPConocido = miHP;
+                }
+                let mt = d.turno === miRol;
+                document.getElementById('spell-menu').style.pointerEvents = mt ? 'auto' : 'none';
+                document.getElementById('turno-txt').innerText = mt ? "TU TURNO" : "TURNO RIVAL";
+                if(miHP <= 0) fin(false);
+                if(enHP <= 0) fin(true);
+            }
         }, 1000);
     }
 
-    function cargarHechizosDuelo() {
-        const menu = document.getElementById('spell-menu');
-        menu.innerHTML = "";
-        HECHIZOS.filter(h => h.lvl <= user.lvl).reverse().forEach(h => {
-            menu.innerHTML += `<button class="btn" onclick="atacar('${h.n}', ${h.dmg})">${h.n}</button>`;
-        });
+    async function elegirPPT(opcion) {
+        document.getElementById('p-ppt').style.display = 'none';
+        await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({
+            [miRol + "_ppt"]: opcion
+        })});
+        addLog(`Elegiste ${opcion}. Esperando rival...`);
+    }
+
+    async function resolverPPT(p1, p2) {
+        if(miRol !== 'p1') return; // Solo el Host calcula el ganador para no duplicar
+        let ganador = "none";
+        if(p1 === p2) { // Empate: resetear
+            await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ p1_ppt: "", p2_ppt: "" })});
+            return;
+        }
+        if((p1==='piedra' && p2==='tijera') || (p1==='papel' && p2==='piedra') || (p1==='tijera' && p2==='papel')) ganador = "p1";
+        else ganador = "p2";
+
+        await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ 
+            status: "jugando", turno: ganador 
+        })});
     }
 
     async function atacar(nombre, dmgBase) {
-        let crit = Math.random() > 0.9 ? 1.5 : 1;
-        let totalDmg = Math.floor((dmgBase + (user.lvl * 3)) * crit);
+        let factor = (Math.random() * 0.4) + 0.8;
+        let totalDmg = Math.floor((dmgBase + (user.lvl * 3)) * factor);
         
         if(esBot) {
             botHP -= totalDmg;
-            addLog(`✨ ${nombre}: ${totalDmg} daño ${crit > 1 ? '(¡CRÍTICO!)' : ''}`);
+            addLog(`✨ ${nombre}: ${totalDmg} daño.`);
             if(botHP <= 0) return fin(true);
             document.getElementById('spell-menu').style.pointerEvents = 'none';
             setTimeout(() => {
-                let dB = Math.floor((10 + (user.lvl * 4)) * (Math.random() * 0.5 + 0.8));
+                let dB = Math.floor((10 + (user.lvl * 4)) * ((Math.random() * 0.4) + 0.8));
                 miHPActual -= dB;
-                addLog(`🔥 Bot lanza hechizo: -${dB} HP`);
+                addLog(`🔥 Bot: -${dB} HP`);
                 actBarrasBot();
                 if(miHPActual <= 0) return fin(false);
                 document.getElementById('spell-menu').style.pointerEvents = 'auto';
@@ -239,23 +252,19 @@
             const d = await r.json();
             const target = miRol === 'p1' ? 'p2_hp' : 'p1_hp';
             const nuevoVal = Math.max(0, (miRol === 'p1' ? d.p2_hp : d.p1_hp) - totalDmg);
-            
             await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({
-                [target]: nuevoVal,
-                turno: (miRol === 'p1' ? 'p2' : 'p1')
+                [target]: nuevoVal, turno: (miRol === 'p1' ? 'p2' : 'p1')
             })});
-            addLog(`Lanzaste ${nombre} (-${totalDmg})`);
+            addLog(`🔮 Lanzaste ${nombre} (-${totalDmg} HP)`);
         }
     }
 
     function entrenamiento() {
-        esBot = true;
-        botMaxHP = Math.floor(user.hpMax * 1.35);
-        botHP = botMaxHP; miHPActual = user.hpMax;
-        cambiarPantalla('duelo');
-        cargarHechizosDuelo();
-        document.getElementById('en-nombre-display').innerText = "BOT ELITE 💀";
+        esBot = true; botMaxHP = Math.floor(user.hpMax * 1.35); botHP = botMaxHP; miHPActual = user.hpMax;
+        cambiarPantalla('duelo'); cargarHechizosDuelo();
+        document.getElementById('en-nombre-display').innerText = "BOT ELITE";
         document.getElementById('mi-nombre-display').innerText = user.nombre;
+        document.getElementById('turno-txt').innerText = "DUELO";
         actBarrasBot();
     }
 
@@ -267,14 +276,19 @@
     function fin(win) {
         clearInterval(loop);
         let reco = win ? (esBot ? 40 : 150) : 10;
-        alert(win ? "¡VICTORIA TRIUNFAL!" : "HAS SIDO DERROTADO");
+        alert(win ? "¡VICTORIA!" : "DERROTA");
         user.xp += reco;
-        while(user.xp >= calcXP()) {
-            user.xp -= calcXP(); user.lvl++; user.hpMax += 25;
-            alert("¡ASCENSO! Ahora eres Nivel " + user.lvl);
-        }
+        while(user.xp >= calcXP()) { user.xp -= calcXP(); user.lvl++; user.hpMax += 25; }
         localStorage.setItem('duelista_v6', JSON.stringify(user));
         location.reload();
+    }
+
+    function cargarHechizosDuelo() {
+        const menu = document.getElementById('spell-menu');
+        menu.innerHTML = "";
+        HECHIZOS.filter(h => h.lvl <= user.lvl).reverse().forEach(h => {
+            menu.innerHTML += `<button class="btn" onclick="atacar('${h.n}', ${h.dmg})">${h.n}</button>`;
+        });
     }
 
     function cambiarPantalla(id) {
