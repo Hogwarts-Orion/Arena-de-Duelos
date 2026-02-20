@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Academia de Duelos - V24</title>
+    <title>Academia de Duelos - V24 ELITE</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Special+Elite&display=swap');
         :root { --gold: #d4af37; --red: #ff4d4d; --green: #2ecc71; --blue: #3498db; --purple: #9b59b6; }
@@ -106,7 +106,7 @@
         { n: "Avada Kedavra", lvl: 600, d: 9999999, c:1 }
     ];
 
-    let user, salaId, miRol, loop, miTurno = false, esBot = false, botHP = 0, miHPBot = 0, esAmistoso = false;
+    let user, salaId, miRol, loop, miTurno = false, esBot = false, botHP = 0, miHPBot = 0, botMaxHP = 0, esAmistoso = false;
 
     function sonar(f, t) {
         try {
@@ -167,7 +167,6 @@
         esAmistoso = (tipo === 'amistoso');
         cambiarPantalla('duelo');
         const lobbyKey = esAmistoso ? 'lobby_amistoso' : `lobby_${user.liga.replace(/ /g, '_')}`;
-        
         const res = await fetch(`${DB_BASE}/${lobbyKey}.json`);
         const lobby = await res.json();
         
@@ -216,23 +215,39 @@
 
     async function atacar(n, db) {
         if(!miTurno) return; miTurno = false;
+        document.getElementById('spell-menu').style.opacity = "0.3";
         let s = Math.random();
         let fd = 0, msg = "";
-        if(s < 0.15) { fd = 0; msg = "MISS"; sonar(150,'sine'); }
+        
+        if(s < 0.12) { fd = 0; msg = "MISS"; sonar(150,'sine'); }
         else {
-            let mult = Math.random() * (1.5 - 0.7) + 0.7;
-            fd = Math.floor((db + (user.lvl * 50)) * mult);
-            if(s > 0.92) { fd *= 2; msg = "CRÍTICO"; sonar(800,'sawtooth'); }
+            let mult = Math.random() * (1.3 - 0.8) + 0.8;
+            fd = Math.floor((db + (user.lvl * 35)) * mult); // Ajustado a 35 para reto real
+            if(s > 0.90) { fd *= 2; msg = "CRÍTICO"; sonar(800,'sawtooth'); }
             else { msg = "HIT"; sonar(400,'triangle'); }
         }
+
         if(esBot) {
-            botHP -= fd; actualizarBarrasBot();
+            botHP -= fd; efectoImpacto(n, fd, msg); actualizarBarrasBot();
             if(botHP <= 0) return fin(true);
+            
+            document.getElementById('turno-txt').innerText = "BOT PENSANDO...";
             setTimeout(() => {
-                let dbot = (50 * user.lvl) * (Math.random()+0.5); miHPBot -= dbot;
-                efectoImpacto("Enemigo", Math.floor(dbot), "HIT"); actualizarBarrasBot();
-                if(miHPBot <= 0) fin(false); else miTurno = true;
-            }, 1000);
+                let botLuck = Math.random();
+                let dmgBot = 0; let botMsg = "HIT";
+                dmgBot = Math.floor((120 + (user.lvl * 55)) * (Math.random() + 0.6));
+                if(botLuck > 0.88) { dmgBot *= 1.8; botMsg = "CRÍTICO BOT"; }
+                if(botLuck < 0.10) { dmgBot = 0; botMsg = "BOT MISS"; }
+                
+                miHPBot -= dmgBot;
+                efectoImpacto("Hechizo Rival", dmgBot, botMsg); actualizarBarrasBot();
+                if(miHPBot <= 0) fin(false);
+                else {
+                    miTurno = true;
+                    document.getElementById('turno-txt').innerText = "TU TURNO";
+                    document.getElementById('spell-menu').style.opacity = "1";
+                }
+            }, 1200);
         } else {
             const r = await fetch(`${DB_BASE}/salas/${salaId}.json`); const d = await r.json();
             const target = miRol === 'p1' ? 'p2_hp' : 'p1_hp';
@@ -251,12 +266,18 @@
     }
 
     function dueloBot() {
-        esBot = true; miRol = "p1"; miTurno = true; botHP = user.hpMax; miHPBot = user.hpMax;
+        esBot = true; miRol = "p1"; miTurno = true;
+        // El Bot ahora tiene MUCHA más vida proporcional a tu nivel
+        botMaxHP = user.hpMax + (user.lvl * 2500); 
+        botHP = botMaxHP;
+        miHPBot = user.hpMax;
         cambiarPantalla('duelo');
         document.getElementById('mi-nombre-display').innerText = user.nombre;
-        document.getElementById('en-nombre-display').innerText = "BOT ENTRENADOR";
+        document.getElementById('en-nombre-display').innerText = "MAESTRO BOT (ELITE)";
+        document.getElementById('turno-txt').innerText = "TU TURNO";
         actualizarBarrasBot(); 
         const m = document.getElementById('spell-menu'); m.innerHTML = "";
+        m.style.opacity = "1";
         HECHIZOS.filter(h => h.lvl <= user.lvl).reverse().forEach(h => {
             m.innerHTML += `<button class="btn" style="${h.c?'border-color:var(--purple)':''}" onclick="atacar('${h.n}', ${h.d})">${h.n.toUpperCase()}</button>`;
         });
@@ -264,7 +285,7 @@
 
     function actualizarBarrasBot() {
         document.getElementById('hp-mi-fill').style.width = (miHPBot/user.hpMax*100) + "%";
-        document.getElementById('hp-en-fill').style.width = (botHP/user.hpMax*100) + "%";
+        document.getElementById('hp-en-fill').style.width = (botHP/botMaxHP*100) + "%";
         document.getElementById('hp-mi-text').innerText = `${Math.floor(miHPBot)}`;
         document.getElementById('hp-en-text').innerText = `${Math.floor(botHP)}`;
     }
@@ -272,7 +293,7 @@
     async function fin(win) {
         clearInterval(loop); alert(win ? "¡VICTORIA!" : "DERROTA");
         let xpGanada = win ? 1000 : 200;
-        if(esAmistoso) xpGanada /= 2; // Menos XP en amistoso
+        if(esAmistoso) xpGanada /= 2;
         user.xp += xpGanada;
         while(user.xp >= (user.lvl * 1500)) { 
             user.xp -= (user.lvl * 1500); user.lvl++; user.hpMax += 800; 
