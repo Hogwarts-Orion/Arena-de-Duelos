@@ -2,108 +2,104 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Academia de Duelos - Torneo Épico</title>
+    <title>Academia de Duelos - Torneo de los Tres Magos</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Special+Elite&display=swap');
-        body { background: #050505; color: #f4e4bc; font-family: 'Special Elite', cursive; margin: 0; padding: 20px; display: flex; justify-content: center; overflow-x: hidden; }
-        .arena-container { background: #1a150f; width: 100%; max-width: 900px; padding: 25px; border: 2px solid #5c4021; border-radius: 15px; text-align: center; box-shadow: 0 0 50px #000; position: relative; }
-        .stats-bar { display: flex; justify-content: space-around; background: #2c1e11; padding: 12px; border: 1px solid #d4af37; margin-bottom: 15px; font-family: 'Cinzel'; font-size: 13px; border-radius: 8px; align-items: center; }
-        .hp-bar { background: #111; height: 20px; border: 1px solid #d4af37; border-radius: 10px; overflow: hidden; margin: 5px 0; }
-        .hp-fill { height: 100%; transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); width: 100%; }
+        body { background: #050505; color: #f4e4bc; font-family: 'Special Elite', cursive; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        
+        /* Contenedor con borde dorado tipo torneo */
+        .arena-container { 
+            background: radial-gradient(circle, #1a150f 0%, #0a0a0a 100%); 
+            width: 100%; max-width: 900px; padding: 30px; 
+            border: 3px double #d4af37; border-radius: 15px; 
+            text-align: center; box-shadow: 0 0 60px rgba(212, 175, 55, 0.2); 
+            position: relative; 
+        }
+
+        h1 { font-family: 'Cinzel'; color: #d4af37; text-shadow: 0 0 15px gold; letter-spacing: 3px; margin-bottom: 25px; }
+
+        .stats-bar { display: flex; justify-content: space-around; background: rgba(44, 30, 17, 0.8); padding: 15px; border: 1px solid #d4af37; margin-bottom: 20px; font-family: 'Cinzel'; border-radius: 10px; }
+        
+        /* Botones Estilo Torneo */
+        .btn { background: #2c1e11; color: #d4af37; border: 1px solid #d4af37; padding: 12px; cursor: pointer; font-family: 'Cinzel'; width: 100%; margin: 5px 0; border-radius: 5px; transition: 0.3s; font-weight: bold; }
+        .btn:hover:not(:disabled) { background: #d4af37; color: #1a150f; box-shadow: 0 0 20px gold; transform: translateY(-2px); }
+        .btn:disabled { opacity: 0.3; filter: grayscale(1); }
+
+        .hp-bar { background: #000; height: 25px; border: 1px solid #d4af37; border-radius: 5px; overflow: hidden; margin: 10px 0; position: relative; }
+        .hp-fill { height: 100%; transition: width 0.5s ease-in-out; }
         #hp-mi-fill { background: linear-gradient(90deg, #1b5e20, #4caf50); }
         #hp-en-fill { background: linear-gradient(90deg, #b71c1c, #f44336); }
-        .btn { background: #1a150f; color: #d4af37; border: 1px solid #5c4021; padding: 10px; cursor: pointer; font-family: 'Cinzel'; width: 100%; margin: 4px 0; border-radius: 5px; transition: 0.2s; font-size: 12px; }
-        .btn:hover:not(:disabled) { background: #d4af37; color: #1a150f; box-shadow: 0 0 10px gold; }
-        .btn:disabled { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
-        #log { height: 140px; overflow-y: auto; background: #000; border: 1px solid #2c1e11; margin-top: 10px; padding: 10px; font-size: 11px; color: #d4af37; border-radius: 5px; text-align: left; }
-        .screen { display: none; }
-        .active { display: block; }
-        .reg-input { width: 85%; padding: 12px; margin: 8px 0; background: #000; border: 1px solid #5c4021; color: #d4af37; text-align: center; border-radius: 5px; }
-        .spell-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 250px; overflow-y: auto; padding: 10px; border: 1px solid #333; border-radius: 10px; background: rgba(0,0,0,0.2); }
-        
-        /* Efecto Destello Victoria PPT */
-        @keyframes flashGold {
-            0% { box-shadow: inset 0 0 0 gold; background: #1a150f; }
-            50% { box-shadow: inset 0 0 100px gold; background: #4a3c00; }
-            100% { box-shadow: inset 0 0 0 gold; background: #1a150f; }
-        }
-        .victory-flash { animation: flashGold 1.5s ease-out; }
 
-        /* Modal PPT */
-        #p-ppt { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; display: none; flex-direction: column; justify-content: center; align-items: center; border-radius: 15px; }
-        .ppt-choice-box { display: flex; gap: 15px; margin-top: 20px; }
-        .ppt-card { padding: 20px; border: 2px solid gold; border-radius: 10px; cursor: pointer; transition: 0.3s; background: #1a150f; }
-        .ppt-card:hover { transform: scale(1.1); background: gold; color: black; }
+        .screen { display: none; animation: fadeIn 0.5s; }
+        .active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .panel-grid { display: grid; grid-template-columns: 1.2fr 1.2fr; gap: 20px; margin-top: 25px; }
+        .panel { background: rgba(0,0,0,0.6); border: 1px solid #5c4021; padding: 15px; border-radius: 8px; height: 300px; overflow-y: auto; text-align: left; }
         
-        .panel-list { height: 250px; overflow-y: auto; text-align: left; font-size: 11px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; border: 1px solid #2c1e11; }
-        .ranking-item { display: flex; justify-content: space-between; border-bottom: 1px solid #2c1e11; padding: 5px 0; color: #f4e4bc; }
+        #log { height: 120px; overflow-y: auto; background: rgba(0,0,0,0.8); border: 1px solid #d4af37; padding: 10px; margin-top: 15px; font-size: 12px; color: #f4e4bc; border-radius: 5px; }
+        
+        /* Destello Victoria */
+        .victory-flash { animation: goldFlash 1s; }
+        @keyframes goldFlash { 0% { background: #1a150f; } 50% { background: #d4af37; } 100% { background: #1a150f; } }
     </style>
 </head>
 <body>
 
-<div class="arena-container" id="main-arena">
-    <h1 style="font-family:'Cinzel'; color:gold; margin:0 0 15px 0;">ACADEMIA DE DUELOS</h1>
-    
+<audio id="bg-music" loop>
+    <source src="TU_ARCHIVO_DE_MUSICA.mp3" type="audio/mpeg">
+</audio>
+
+<div class="arena-container" id="main-frame">
+    <h1>ACADEMIA DE DUELOS</h1>
+
     <div id="p-registro" class="screen">
-        <h3 style="font-family:'Cinzel'">INGRESO AL COLEGIO</h3>
-        <input type="text" id="reg-nombre" class="reg-input" placeholder="Nombre de Mago">
-        <input type="password" id="reg-pass" class="reg-input" placeholder="Contraseña">
-        <input type="text" id="reg-emoji" class="reg-input" placeholder="Tu Emoji (🧙)">
-        <button id="btn-reg" class="btn" onclick="iniciarSesion()">ACCEDER ✨</button>
+        <h3 style="font-family:'Cinzel'">INSCRIPCIÓN AL TORNEO</h3>
+        <input type="text" id="reg-nombre" style="padding:10px; width:80%; margin:10px;" placeholder="Nombre de Mago">
+        <input type="password" id="reg-pass" style="padding:10px; width:80%; margin:10px;" placeholder="Contraseña">
+        <button class="btn" onclick="iniciarSesion()">ENTRAR A LA ACADEMIA ✨</button>
     </div>
 
     <div id="p-lobby" class="screen">
         <div class="stats-bar">
-            <span>LVL: <b id="stat-lvl" style="color:gold">1</b></span>
-            <span>HP: <b id="stat-hp" style="color:#2ecc71">100</b></span>
-            <span id="saludo" style="color:gold;"></span>
+            <span id="saludo" style="color:gold; font-size:16px;"></span>
+            <span>NIVEL: <b id="stat-lvl" style="color:#d4af37">1</b></span>
+            <span>VIDA: <b id="stat-hp" style="color:#2ecc71">100</b></span>
         </div>
+        
         <div style="display:flex; gap:10px;">
-            <button class="btn" onclick="buscarPartida()">DUELO ONLINE ⚔️</button>
-            <button class="btn" onclick="cerrarSesion()" style="width:120px">CERRAR SESIÓN</button>
+            <button class="btn" onclick="buscarPartida()">INICIAR DUELO ONLINE ⚔️</button>
+            <button class="btn" onclick="cerrarSesion()" style="width:150px; border-color:gray;">SALIR</button>
         </div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:20px;">
-            <div>
-                <h4 style="color:gold; margin:5px;">🏆 TOP MAGOS</h4>
-                <div id="ranking-lista" class="panel-list"></div>
-            </div>
-            <div>
-                <h4 style="color:gold; margin:5px;">📖 GRIMORIO</h4>
-                <div id="grimorio-lista" class="panel-list"></div>
-            </div>
-        </div>
-    </div>
 
-    <div id="p-ppt">
-        <h2 id="ppt-msg" style="color:gold; font-family:'Cinzel';">¿Piedra, Papel o Tijera?</h2>
-        <div class="ppt-choice-box" id="ppt-controls">
-            <div class="ppt-card" onclick="elegirPPT('piedra')">💎 PIEDRA</div>
-            <div class="ppt-card" onclick="elegirPPT('papel')">📜 PAPEL</div>
-            <div class="ppt-card" onclick="elegirPPT('tijera')">✂️ TIJERA</div>
+        <div class="panel-grid">
+            <div class="panel">
+                <h4 style="color:gold; font-family:'Cinzel'; margin-top:0;">📖 TU GRIMORIO</h4>
+                <div id="grimorio-lista"></div>
+            </div>
+            <div class="panel">
+                <h4 style="color:gold; font-family:'Cinzel'; margin-top:0;">🏆 RANKING DE MAGOS</h4>
+                <div id="ranking-lista"></div>
+            </div>
         </div>
     </div>
 
     <div id="p-duelo" class="screen">
         <div class="stats-bar">
             <span id="mi-nombre-display"></span>
-            <span id="turno-txt" style="color:gold; font-size:18px; border:1px solid gold; padding:2px 10px;">ESPERANDO...</span>
+            <span id="turno-txt" style="color:gold; font-size:18px;">PREPARANDO...</span>
             <span id="en-nombre-display"></span>
         </div>
         <div class="hp-bar"><div id="hp-en-fill" class="hp-fill"></div></div>
         <div class="hp-bar"><div id="hp-mi-fill" class="hp-fill"></div></div>
         
-        <div id="spell-container">
-            <h4 style="color:gold; margin:10px 0;">HECHIZOS DESBLOQUEADOS</h4>
-            <div id="spell-menu" class="spell-grid"></div>
-        </div>
-        
+        <div id="spell-menu" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:10px;"></div>
         <div id="log"></div>
     </div>
 </div>
 
 <script>
     const DB_BASE = "https://duelos-af899-default-rtdb.firebaseio.com";
-    
     const HECHIZOS = [
         { n: "Expelliarmus", lvl: 1, dmg: 15 }, { n: "Incendio", lvl: 4, dmg: 18 },
         { n: "Depulso", lvl: 8, dmg: 21 }, { n: "Offensio", lvl: 12, dmg: 23 },
@@ -125,172 +121,134 @@
         { n: "Crucio", lvl: 155, dmg: 650 }, { n: "Avada Kedavra", lvl: 160, dmg: 999 }
     ];
 
-    let user = null;
-    let salaId, miRol, loop, yaElegiPPT = false, miTurno = false, lastHP = 0;
+    let user, salaId, miRol, loop, miTurno = false, musicStarted = false;
 
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    function playSnd(f1, f2, d) {
-        const o = ctx.createOscillator(); const g = ctx.createGain();
-        o.connect(g); g.connect(ctx.destination);
-        o.frequency.setValueAtTime(f1, ctx.currentTime);
-        o.frequency.exponentialRampToValueAtTime(f2, ctx.currentTime + d);
-        g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + d);
-        o.start(); o.stop(ctx.currentTime + d);
-    }
+    // Función para activar música con el primer clic
+    document.body.addEventListener('click', () => {
+        if(!musicStarted) {
+            const m = document.getElementById('bg-music');
+            m.play().catch(e => console.log("Esperando interacción"));
+            musicStarted = true;
+        }
+    });
 
     async function iniciarSesion() {
         const nom = document.getElementById('reg-nombre').value.trim().toLowerCase();
         const pass = document.getElementById('reg-pass').value;
-        if(!nom || !pass) return alert("Faltan datos");
         const res = await fetch(`${DB_BASE}/usuarios/${nom}.json`);
         const data = await res.json();
         if(data) {
             if(data.pass === pass) user = data; else return alert("Pass incorrecta");
         } else {
-            user = { nombre: nom, pass, emoji: document.getElementById('reg-emoji').value||"🧙", lvl: 1, xp: 0, hpMax: 100 };
+            user = { nombre: nom, pass, lvl: 1, xp: 0, hpMax: 100, emoji: "🧙" };
             await fetch(`${DB_BASE}/usuarios/${nom}.json`, { method: 'PUT', body: JSON.stringify(user) });
         }
         localStorage.setItem('mago_sesion', nom);
-        init();
+        initModoAcademia();
+    }
+
+    function initModoAcademia() {
+        cambiarPantalla('lobby');
+        document.getElementById('saludo').innerText = "BIENVENIDO, " + user.nombre.toUpperCase();
+        document.getElementById('stat-lvl').innerText = user.lvl;
+        document.getElementById('stat-hp').innerText = user.hpMax;
+        
+        // Cargar Grimorio
+        const grim = document.getElementById('grimorio-lista'); grim.innerHTML = "";
+        HECHIZOS.forEach(h => {
+            const unlocked = h.lvl <= user.lvl;
+            grim.innerHTML += `<div style="color:${unlocked?'#2ecc71':'#666'}; margin-bottom:5px;">${unlocked?'✅':'🔒'} ${h.n}</div>`;
+        });
+        
+        cargarRanking();
     }
 
     async function cargarRanking() {
         const res = await fetch(`${DB_BASE}/usuarios.json`);
         const data = await res.json();
-        const lista = document.getElementById('ranking-lista'); lista.innerHTML = "";
+        const list = document.getElementById('ranking-lista'); list.innerHTML = "";
         if(!data) return;
         Object.values(data).sort((a,b) => b.lvl - a.lvl).slice(0, 10).forEach((m, i) => {
-            lista.innerHTML += `<div class="ranking-item"><span>#${i+1} ${m.emoji} ${m.nombre}</span> <span>Lvl ${m.lvl}</span></div>`;
+            list.innerHTML += `<div style="display:flex; justify-content:space-between; border-bottom:1px solid #333; padding:3px;">
+                <span>#${i+1} ${m.nombre}</span> <span>Lvl ${m.lvl}</span>
+            </div>`;
         });
     }
 
-    function init() {
-        cambiarPantalla('lobby');
-        document.getElementById('saludo').innerText = `${user.emoji} ${user.nombre.toUpperCase()}`;
-        document.getElementById('stat-lvl').innerText = user.lvl;
-        document.getElementById('stat-hp').innerText = user.hpMax;
-        const grim = document.getElementById('grimorio-lista'); grim.innerHTML = "";
-        HECHIZOS.forEach(h => {
-            const ok = h.lvl <= user.lvl;
-            grim.innerHTML += `<div style="color:${ok?'#2ecc71':'#666'}">${ok?'✅':'🔒'} ${h.n} (Lvl ${h.lvl})</div>`;
-        });
-        cargarRanking();
-    }
-
+    // Lógica de duelo simplificada y segura
     async function buscarPartida() {
-        playSnd(400, 800, 0.2); yaElegiPPT = false; miTurno = false; cambiarPantalla('duelo');
-        document.getElementById('spell-container').style.display = 'none';
+        cambiarPantalla('duelo');
         const res = await fetch(`${DB_BASE}/lobby.json`);
         const lobby = await res.json();
         if(!lobby) {
             salaId = "sala_" + Date.now(); miRol = "p1";
             await fetch(`${DB_BASE}/lobby.json`, { method: 'PUT', body: JSON.stringify({ salaId, uid: user.nombre }) });
-            await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PUT', body: JSON.stringify({ p1_n: user.nombre, p1_hp: user.hpMax, p1_m: user.hpMax, p2_n: "Buscando...", p2_hp: 0, p2_m: 0, status: "esperando", p1_ppt: "", p2_ppt: "", turno: "none" })});
+            await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PUT', body: JSON.stringify({ p1_n: user.nombre, p1_hp: user.hpMax, p1_m: user.hpMax, p2_n: "Buscando...", p2_hp: 0, p2_m: 0, status: "jugando", turno: "p1" })});
         } else {
             salaId = lobby.salaId; miRol = "p2";
             await fetch(`${DB_BASE}/lobby.json`, { method: 'DELETE' });
-            await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ p2_n: user.nombre, p2_hp: user.hpMax, p2_m: user.hpMax, status: "ppt" })});
+            await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ p2_n: user.nombre, p2_hp: user.hpMax, p2_m: user.hpMax })});
         }
-        lastHP = user.hpMax; empezarLoop();
+        empezarLoopDuelo();
     }
 
-    function empezarLoop() {
-        cargarHechizosDuelo();
+    function empezarLoopDuelo() {
+        const menu = document.getElementById('spell-menu'); menu.innerHTML = "";
+        HECHIZOS.filter(h => h.lvl <= user.lvl).reverse().forEach(h => {
+            menu.innerHTML += `<button class="btn" onclick="atacar('${h.n}', ${h.dmg})">${h.n}</button>`;
+        });
+
         loop = setInterval(async () => {
             const r = await fetch(`${DB_BASE}/salas/${salaId}.json`);
             const d = await r.json(); if(!d) return;
-            const miHP = miRol==='p1'?d.p1_hp:d.p2_hp; const enHP = miRol==='p1'?d.p2_hp:d.p1_hp;
+            
+            const miHP = miRol === 'p1' ? d.p1_hp : d.p2_hp;
+            const enHP = miRol === 'p1' ? d.p2_hp : d.p1_hp;
+            
             document.getElementById('hp-mi-fill').style.width = (miHP/(miRol==='p1'?d.p1_m:d.p2_m)*100) + "%";
             document.getElementById('hp-en-fill').style.width = (enHP/(miRol==='p1'?d.p2_m:d.p1_m)*100) + "%";
-            document.getElementById('en-nombre-display').innerText = miRol==='p1'?d.p2_n:d.p1_n;
             document.getElementById('mi-nombre-display').innerText = user.nombre;
+            document.getElementById('en-nombre-display').innerText = miRol==='p1'?d.p2_n:d.p1_n;
 
-            if(d.status === "ppt") {
-                document.getElementById('spell-container').style.display = 'none';
-                if(!yaElegiPPT) document.getElementById('p-ppt').style.display = 'flex';
-                if(d.p1_ppt && d.p2_ppt && miRol === 'p1') resolverPPT(d.p1_ppt, d.p2_ppt);
-            }
+            miTurno = (d.turno === miRol);
+            document.getElementById('turno-txt').innerText = miTurno ? "TU TURNO ✨" : "RIVAL LANZANDO...";
+            menu.style.pointerEvents = miTurno ? 'auto' : 'none';
+            menu.style.opacity = miTurno ? '1' : '0.4';
 
-            if(d.status === "jugando") {
-                document.getElementById('p-ppt').style.display = 'none';
-                document.getElementById('spell-container').style.display = 'block';
-                if(miHP < lastHP) { playSnd(200, 50, 0.3); addLog(`💥 IMPACTO! -${lastHP - miHP} HP`); lastHP = miHP; }
-                miTurno = (d.turno === miRol);
-                document.getElementById('turno-txt').innerText = miTurno ? "TU TURNO ✨" : "ESPERANDO RIVAL...";
-                document.getElementById('turno-txt').style.borderColor = miTurno ? "lime" : "gold";
-                document.getElementById('spell-menu').style.pointerEvents = miTurno ? 'auto' : 'none';
-                document.getElementById('spell-menu').style.opacity = miTurno ? '1' : '0.4';
-                if(miHP <= 0) fin(false); if(enHP <= 0) fin(true);
-            }
+            if(miHP <= 0) fin(false); if(enHP <= 0) fin(true);
         }, 800);
     }
 
-    async function elegirPPT(op) { 
-        playSnd(300, 300, 0.1); yaElegiPPT = true; 
-        document.getElementById('ppt-controls').style.display = 'none';
-        document.getElementById('ppt-msg').innerText = "Esperando al rival...";
-        await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ [miRol+"_ppt"]: op })});
-    }
-
-    async function resolverPPT(p1, p2) {
-        if(p1 === p2) { 
-            await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ p1_ppt: "", p2_ppt: "" })}); 
-            return; 
-        }
-        let gana = ((p1==='piedra'&&p2==='tijera')||(p1==='papel'&&p2==='piedra')||(p1==='tijera'&&p2==='papel')) ? "p1" : "p2";
-        await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ status: "jugando", turno: gana })});
-        
-        // Efecto destello si el usuario local gana
-        if(miRol === gana) {
-            document.getElementById('main-arena').classList.add('victory-flash');
-            setTimeout(() => document.getElementById('main-arena').classList.remove('victory-flash'), 1500);
-        }
-
-        addLog(`🎲 SORTEO: P1 (${p1}) vs P2 (${p2}). Gana turno: ${gana.toUpperCase()}`);
-    }
-
     async function atacar(n, dmg) {
-        if(!miTurno) return;
-        miTurno = false;
-        playSnd(600, 1200, 0.4);
-        let tot = Math.floor((dmg + (user.lvl*3)) * (Math.random()*0.4 + 0.8));
+        if(!miTurno) return; miTurno = false;
+        let t = Math.floor((dmg + (user.lvl*3)) * (Math.random()*0.4 + 0.8));
         const r = await fetch(`${DB_BASE}/salas/${salaId}.json`);
         const d = await r.json();
-        const t = miRol==='p1'?'p2_hp':'p1_hp';
-        const nv = Math.max(0, (miRol==='p1'?d.p2_hp:d.p1_hp) - tot);
-        await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ [t]: nv, turno: miRol==='p1'?'p2':'p1' })});
-        addLog(`🪄 ${n} lanzado con éxito (-${tot} HP)`);
+        const target = miRol === 'p1' ? 'p2_hp' : 'p1_hp';
+        const newVal = Math.max(0, (miRol==='p1'?d.p2_hp:d.p1_hp) - t);
+        await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ [target]: newVal, turno: miRol==='p1'?'p2':'p1' })});
+        addLog(`Lanzaste ${n} (-${t} HP)`);
     }
 
-    function cargarHechizosDuelo() {
-        const m = document.getElementById('spell-menu'); m.innerHTML = "";
-        HECHIZOS.filter(h => h.lvl <= user.lvl).reverse().forEach(h => {
-            m.innerHTML += `<button class="btn" onclick="atacar('${h.n}', ${h.dmg})">${h.n.toUpperCase()}</button>`;
-        });
-    }
+    function addLog(m) { const l = document.getElementById('log'); l.innerHTML = `<div>> ${m}</div>` + l.innerHTML; }
+    function cambiarPantalla(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('p-'+id).classList.add('active'); }
+    function cerrarSesion() { localStorage.removeItem('mago_sesion'); location.reload(); }
 
     async function fin(win) {
-        clearInterval(loop); alert(win ? "¡VICTORIA EN EL DUELO!" : "HAS SIDO DERROTADO");
+        clearInterval(loop); alert(win ? "VICTORIA" : "DERROTA");
         user.xp += win ? 250 : 30;
         while(user.xp >= (user.lvl*200)) { user.xp -= (user.lvl*200); user.lvl++; user.hpMax += 30; }
         await fetch(`${DB_BASE}/usuarios/${user.nombre}.json`, { method: 'PUT', body: JSON.stringify(user) });
         location.reload();
     }
 
-    function cambiarPantalla(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('p-' + id).classList.add('active');
-    }
-
-    function addLog(m) { const l = document.getElementById('log'); l.innerHTML = `<div>> ${m}</div>` + l.innerHTML; l.scrollTop = 0; }
-    function cerrarSesion() { localStorage.removeItem('mago_sesion'); location.reload(); }
-
+    // Auto-login al Modo Academia
     (async () => {
         const s = localStorage.getItem('mago_sesion');
         if(s) {
             const r = await fetch(`${DB_BASE}/usuarios/${s}.json`);
             user = await r.json();
-            if(user) init(); else cambiarPantalla('registro');
+            if(user) initModoAcademia(); else cambiarPantalla('registro');
         } else cambiarPantalla('registro');
     })();
 </script>
