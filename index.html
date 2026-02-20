@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Academia de Duelos - Hechizos Completos</title>
+    <title>Academia de Duelos - Login Cloud</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Special+Elite&display=swap');
         body { background: #050505; color: #f4e4bc; font-family: 'Special Elite', cursive; margin: 0; padding: 20px; display: flex; justify-content: center; }
@@ -20,11 +20,10 @@
         .active { display: block; }
         .reg-input { width: 85%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #5c4021; color: #d4af37; text-align: center; border-radius: 5px; }
         .spell-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 250px; overflow-y: auto; padding: 10px; }
-        .grimorio { margin-top: 20px; text-align: left; background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; border: 1px solid #333; max-height: 300px; overflow-y: auto; }
-        .spell-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 11px; }
-        .unlocked { color: #2ecc71; font-weight: bold; } 
-        .locked { color: #666; }
         #p-ppt { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1a150f; border: 3px solid gold; padding: 20px; z-index: 100; border-radius: 15px; display: none; width: 300px; box-shadow: 0 0 100px #000; }
+        .grimorio { margin-top: 20px; text-align: left; background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; border: 1px solid #333; max-height: 200px; overflow-y: auto; }
+        .spell-list { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 10px; }
+        .unlocked { color: #2ecc71; } .locked { color: #666; }
     </style>
 </head>
 <body>
@@ -33,10 +32,12 @@
     <h1 style="font-family:'Cinzel'; color:gold; margin:0;">ACADEMIA DE DUELOS</h1>
     
     <div id="p-registro" class="screen">
-        <h3>REGISTRO DE MAGO</h3>
-        <input type="text" id="reg-nombre" class="reg-input" placeholder="Tu nombre">
-        <input type="text" id="reg-emoji" class="reg-input" placeholder="Tu Emoji">
-        <button id="btn-reg" class="btn" onclick="registrar()">OBTENER VARITA ✨</button>
+        <h3 style="font-family:'Cinzel'">ENTRAR A LA ACADEMIA</h3>
+        <p style="font-size: 11px;">Si no tienes cuenta, se creará una nueva.</p>
+        <input type="text" id="reg-nombre" class="reg-input" placeholder="Nombre de Mago">
+        <input type="password" id="reg-pass" class="reg-input" placeholder="Contraseña Mágica">
+        <input type="text" id="reg-emoji" class="reg-input" placeholder="Tu Emoji (ej: 🧙)">
+        <button id="btn-reg" class="btn" onclick="iniciarSesion()">ENTRAR ✨</button>
     </div>
 
     <div id="p-lobby" class="screen">
@@ -48,19 +49,17 @@
         <h3 id="saludo" style="font-family:'Cinzel'"></h3>
         <button class="btn" onclick="buscarPartida()">DUELO ONLINE ⚔️</button>
         <button class="btn" style="border-color:#b71c1c; color:#f44336;" onclick="entrenamiento()">ENTRENAR (BOT) 💀</button>
+        <button class="btn" style="font-size: 10px; border:none;" onclick="cerrarSesion()">Cerrar Sesión 🚪</button>
         <div class="grimorio">
-            <h3 style="text-align:center; color:gold;">📖 EL GRIMORIO COMPLETO</h3>
             <div id="grimorio-lista" class="spell-list"></div>
         </div>
     </div>
 
     <div id="p-ppt">
-        <h3 style="font-family:'Cinzel'; color:gold;">SORTEO DE TURNO</h3>
-        <div id="ppt-btns">
-            <button class="btn" onclick="elegirPPT('piedra')">💎 Piedra</button>
-            <button class="btn" onclick="elegirPPT('papel')">📜 Papel</button>
-            <button class="btn" onclick="elegirPPT('tijera')">✂️ Tijera</button>
-        </div>
+        <h3 style="font-family:'Cinzel'; color:gold;">SORTEO</h3>
+        <button class="btn" onclick="elegirPPT('piedra')">💎 Piedra</button>
+        <button class="btn" onclick="elegirPPT('papel')">📜 Papel</button>
+        <button class="btn" onclick="elegirPPT('tijera')">✂️ Tijera</button>
     </div>
 
     <div id="p-duelo" class="screen">
@@ -78,81 +77,97 @@
 
 <script>
     const DB_BASE = "https://duelos-af899-default-rtdb.firebaseio.com";
-    
-    // Lista completa de hechizos con escalado de nivel
     const HECHIZOS = [
-        // ATAQUE
-        { n: "Expelliarmus", lvl: 1, dmg: 15 }, { n: "Incendio", lvl: 4, dmg: 18 },
-        { n: "Depulso", lvl: 8, dmg: 21 }, { n: "Offensio", lvl: 12, dmg: 24 },
-        { n: "Furnunculus", lvl: 16, dmg: 27 }, { n: "Oppugno", lvl: 20, dmg: 30 },
-        { n: "Densaugeo", lvl: 24, dmg: 33 }, { n: "Desmaius", lvl: 28, dmg: 36 },
-        { n: "Penetro", lvl: 32, dmg: 40 },
-        // FURTIVOS
-        { n: "Rictusempra", lvl: 36, dmg: 43 }, { n: "Flipendo", lvl: 40, dmg: 46 },
-        { n: "Immobulus", lvl: 44, dmg: 50 }, { n: "Diffindo", lvl: 48, dmg: 55 },
-        { n: "Impedimenta", lvl: 52, dmg: 60 }, { n: "Melofors", lvl: 56, dmg: 65 },
-        { n: "Ebublio", lvl: 60, dmg: 70 }, { n: "Gladii Pluvia", lvl: 65, dmg: 75 },
-        { n: "Everte Statum", lvl: 70, dmg: 80 }, { n: "Relaskio", lvl: 75, dmg: 85 },
-        { n: "Jinx", lvl: 80, dmg: 95 },
-        // DEFENSA (Ataque con efectos visuales/daño)
-        { n: "Petrificus Totalus", lvl: 85, dmg: 110 }, { n: "Bombarda", lvl: 90, dmg: 125 },
-        { n: "Incarcerous", lvl: 95, dmg: 140 }, { n: "Meteolojinx", lvl: 100, dmg: 160 },
-        { n: "Slugulus Eructo", lvl: 105, dmg: 180 }, { n: "Mimblewimble", lvl: 110, dmg: 200 },
-        { n: "Cacaetum Aria", lvl: 115, dmg: 220 }, { n: "Confundus", lvl: 120, dmg: 240 },
-        { n: "Geo Terrum", lvl: 125, dmg: 270 }, { n: "Lacarnum Inflamari", lvl: 130, dmg: 300 },
-        { n: "Tarantallegra", lvl: 135, dmg: 330 },
-        // MALDICIONES
-        { n: "Sectumsempra", lvl: 140, dmg: 400 }, { n: "Confringo", lvl: 145, dmg: 450 },
-        { n: "Imperio", lvl: 150, dmg: 500 }, { n: "Crucio", lvl: 155, dmg: 600 },
-        { n: "Avada Kedavra", lvl: 160, dmg: 999 }
+        { n: "Expelliarmus", lvl: 1, dmg: 15 }, { n: "Incendio", lvl: 5, dmg: 20 },
+        { n: "Depulso", lvl: 10, dmg: 25 }, { n: "Offensio", lvl: 15, dmg: 30 },
+        { n: "Furnunculus", lvl: 20, dmg: 35 }, { n: "Oppugno", lvl: 25, dmg: 40 },
+        { n: "Desmaius", lvl: 35, dmg: 50 }, { n: "Sectumsempra", lvl: 140, dmg: 300 },
+        { n: "Crucio", lvl: 150, dmg: 500 }, { n: "Avada Kedavra", lvl: 160, dmg: 999 }
     ];
 
-    let user = JSON.parse(localStorage.getItem('duelista_v9'));
+    let user = null;
     let salaId, miRol, loop, esBot, botHP, botMaxHP, miHPActual, lastHPConocido;
     let yaElegiPPT = false, faseActual = "inicio";
 
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    const ctx = new AudioCtx();
-    function playSound(tipo) {
+    // --- AUDIO ---
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSound(f1, f2, dur) {
         const osc = ctx.createOscillator(); const gain = ctx.createGain();
         osc.connect(gain); gain.connect(ctx.destination);
-        const t = ctx.currentTime;
-        if(tipo === 'click') { osc.frequency.setValueAtTime(400, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1); osc.start(); osc.stop(t + 0.1); }
-        if(tipo === 'spell') { osc.frequency.setValueAtTime(100, t); osc.frequency.exponentialRampToValueAtTime(1000, t+0.4); gain.gain.exponentialRampToValueAtTime(0.01, t+0.4); osc.start(); osc.stop(t+0.4); }
-        if(tipo === 'hit') { osc.type = 'square'; osc.frequency.setValueAtTime(80, t); gain.gain.linearRampToValueAtTime(0.01, t + 0.3); osc.start(); osc.stop(t + 0.3); }
+        osc.frequency.setValueAtTime(f1, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(f2, ctx.currentTime + dur);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + dur);
+        osc.start(); osc.stop(ctx.currentTime + dur);
     }
 
-    function registrar() {
-        playSound('click');
-        const n = document.getElementById('reg-nombre').value;
-        if(!n) return alert("Nombre necesario");
-        user = { uid: "mago_" + Math.random().toString(36).substr(2, 9), nombre: n, emoji: document.getElementById('reg-emoji').value || "🪄", lvl: 1, xp: 0, hpMax: 100 };
-        localStorage.setItem('duelista_v9', JSON.stringify(user));
+    // --- LOGIN / REGISTRO CLOUD ---
+    async function iniciarSesion() {
+        const nom = document.getElementById('reg-nombre').value.trim().toLowerCase();
+        const pass = document.getElementById('reg-pass').value;
+        const emo = document.getElementById('reg-emoji').value || "🧙";
+        if(!nom || !pass) return alert("Nombre y contraseña obligatorios.");
+
+        document.getElementById('btn-reg').disabled = true;
+        const res = await fetch(`${DB_BASE}/usuarios/${nom}.json`);
+        const data = await res.json();
+
+        if(data) {
+            if(data.pass === pass) {
+                user = data;
+                alert("¡Bienvenido de nuevo, " + data.nombre + "!");
+            } else {
+                alert("Contraseña incorrecta.");
+                document.getElementById('btn-reg').disabled = false;
+                return;
+            }
+        } else {
+            user = { nombre: nom, pass: pass, emoji: emo, lvl: 1, xp: 0, hpMax: 100 };
+            await fetch(`${DB_BASE}/usuarios/${nom}.json`, { method: 'PUT', body: JSON.stringify(user) });
+            alert("Cuenta creada con éxito.");
+        }
+        localStorage.setItem('mago_sesion', nom);
         init();
     }
 
+    async function autoLogin() {
+        const guardado = localStorage.getItem('mago_sesion');
+        if(guardado) {
+            const res = await fetch(`${DB_BASE}/usuarios/${guardado}.json`);
+            user = await res.json();
+            if(user) init(); else cambiarPantalla('registro');
+        } else {
+            cambiarPantalla('registro');
+        }
+    }
+
+    function cerrarSesion() {
+        localStorage.removeItem('mago_sesion');
+        location.reload();
+    }
+
     function init() {
-        if(!user) return cambiarPantalla('registro');
         cambiarPantalla('lobby');
-        document.getElementById('saludo').innerText = `${user.emoji} ${user.nombre}`;
+        document.getElementById('saludo').innerText = `${user.emoji} ${user.nombre.toUpperCase()}`;
         document.getElementById('stat-lvl').innerText = user.lvl;
         document.getElementById('stat-hp').innerText = user.hpMax;
         document.getElementById('stat-xp').innerText = `${user.xp}/${(user.lvl*200)}`;
+        
         const g = document.getElementById('grimorio-lista'); g.innerHTML = "";
         HECHIZOS.forEach(h => {
             const ok = h.lvl <= user.lvl;
-            g.innerHTML += `<div class="spell-item ${ok?'unlocked':'locked'}">${ok?'✅':'🔒'} ${h.n}</div>`;
+            g.innerHTML += `<div class="${ok?'unlocked':'locked'}">${ok?'✅':'🔒'} ${h.n}</div>`;
         });
     }
 
+    // --- LÓGICA DE DUELO (Igual que antes pero guardando en Cloud al ganar) ---
     async function buscarPartida() {
-        playSound('click'); esBot = false; yaElegiPPT = false; cambiarPantalla('duelo');
+        playSound(400, 600, 0.2); esBot = false; yaElegiPPT = false; cambiarPantalla('duelo');
         const res = await fetch(`${DB_BASE}/lobby.json`);
         const lobby = await res.json();
         if(!lobby) {
             salaId = "sala_" + Date.now(); miRol = "p1";
-            await fetch(`${DB_BASE}/lobby.json`, { method: 'PUT', body: JSON.stringify({ salaId, uid: user.uid }) });
-            await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PUT', body: JSON.stringify({ p1_n: user.nombre, p1_hp: user.hpMax, p1_m: user.hpMax, p2_n: "Buscando...", p2_hp: 0, p2_m: 0, status: "esperando", p1_ppt: "", p2_ppt: "", turno: "none" })});
+            await fetch(`${DB_BASE}/lobby.json`, { method: 'PUT', body: JSON.stringify({ salaId, uid: user.nombre }) });
+            await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PUT', body: JSON.stringify({ p1_n: user.nombre, p1_hp: user.hpMax, p1_m: user.hpMax, p2_n: "...", p2_hp: 0, p2_m: 0, status: "esperando", p1_ppt: "", p2_ppt: "", turno: "none" })});
         } else {
             salaId = lobby.salaId; miRol = "p2";
             await fetch(`${DB_BASE}/lobby.json`, { method: 'DELETE' });
@@ -167,11 +182,11 @@
             const r = await fetch(`${DB_BASE}/salas/${salaId}.json`);
             const d = await r.json(); if(!d) return;
             faseActual = d.status;
-            const mP1 = miRol==='p1';
-            const miHP = mP1?d.p1_hp:d.p2_hp; const enHP = mP1?d.p2_hp:d.p1_hp;
-            document.getElementById('hp-mi-fill').style.width = (miHP/(mP1?d.p1_m:d.p2_m)*100) + "%";
-            document.getElementById('hp-en-fill').style.width = (enHP/(mP1?d.p2_m:d.p1_m)*100) + "%";
-            document.getElementById('en-nombre-display').innerText = mP1?d.p2_n:d.p1_n;
+            const miHP = miRol==='p1'?d.p1_hp:d.p2_hp;
+            const enHP = miRol==='p1'?d.p2_hp:d.p1_hp;
+            document.getElementById('hp-mi-fill').style.width = (miHP/(miRol==='p1'?d.p1_m:d.p2_m)*100) + "%";
+            document.getElementById('hp-en-fill').style.width = (enHP/(miRol==='p1'?d.p2_m:d.p1_m)*100) + "%";
+            document.getElementById('en-nombre-display').innerText = miRol==='p1'?d.p2_n:d.p1_n;
 
             if(faseActual === "ppt") {
                 if(!yaElegiPPT) document.getElementById('p-ppt').style.display = 'block';
@@ -181,7 +196,7 @@
                 }
             }
             if(faseActual === "jugando") {
-                if(miHP < lastHPConocido) { playSound('hit'); addLog(`💥 IMPACTO: -${lastHPConocido - miHP} HP`); lastHPConocido = miHP; }
+                if(miHP < lastHPConocido) { playSound(200, 50, 0.3); addLog(`💥 -${lastHPConocido - miHP} HP`); lastHPConocido = miHP; }
                 let mt = d.turno === miRol;
                 document.getElementById('spell-menu').style.pointerEvents = mt ? 'auto' : 'none';
                 document.getElementById('turno-txt').innerText = mt ? "TU TURNO" : "ESPERA";
@@ -190,24 +205,22 @@
         }, 1000);
     }
 
-    async function elegirPPT(op) {
-        playSound('click'); yaElegiPPT = true; document.getElementById('p-ppt').style.display = 'none';
+    async function elegirPPT(op) { yaElegiPPT = true; document.getElementById('p-ppt').style.display = 'none';
         await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ [miRol+"_ppt"]: op })});
-        addLog(`Lanzaste ${op.toUpperCase()}...`);
     }
 
     async function resolverPPT(p1, p2) {
         if(p1 === p2) {
             await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ p1_ppt: "", p2_ppt: "" })});
-            yaElegiPPT = false; addLog("EMPATE en sorteo, repitiendo..."); return;
+            yaElegiPPT = false; return;
         }
         let gana = ((p1==='piedra'&&p2==='tijera')||(p1==='papel'&&p2==='piedra')||(p1==='tijera'&&p2==='papel')) ? "p1" : "p2";
         await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ status: "jugando", turno: gana })});
-        addLog(`🎲 SORTEO: [P1: ${p1}] vs [P2: ${p2}] - GANA ${gana.toUpperCase()}`);
+        addLog(`Sorteo: ${p1} vs ${p2}. Empieza ${gana}`);
     }
 
     async function atacar(n, dmg) {
-        playSound('spell');
+        playSound(600, 1000, 0.4);
         let total = Math.floor((dmg + (user.lvl*3)) * (Math.random()*0.4 + 0.8));
         const r = await fetch(`${DB_BASE}/salas/${salaId}.json`);
         const d = await r.json();
@@ -224,11 +237,14 @@
         });
     }
 
-    function fin(win) {
-        clearInterval(loop); alert(win ? "¡VICTORIA!" : "DERROTA");
+    async function fin(win) {
+        clearInterval(loop);
+        alert(win ? "¡VICTORIA!" : "DERROTA");
         user.xp += win ? 200 : 20;
         while(user.xp >= (user.lvl*200)) { user.xp -= (user.lvl*200); user.lvl++; user.hpMax += 30; }
-        localStorage.setItem('duelista_v9', JSON.stringify(user));
+        
+        // GUARDAR PROGRESO EN FIREBASE
+        await fetch(`${DB_BASE}/usuarios/${user.nombre}.json`, { method: 'PUT', body: JSON.stringify(user) });
         location.reload();
     }
 
@@ -241,7 +257,7 @@
         const l = document.getElementById('log'); l.innerHTML = `<div>> ${m}</div>` + l.innerHTML;
     }
 
-    init();
+    autoLogin();
 </script>
 </body>
 </html>
