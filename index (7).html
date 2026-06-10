@@ -964,6 +964,43 @@
   }
 
   function removerTextoVacio(gridId) { const c = document.getElementById(gridId); if(c) { const t = c.querySelector('.txt-vacio'); if(t) t.style.display = 'none'; } }
+// --- NUEVAS FUNCIONES PARA PANEL MAESTRO ---
+
+// 1. Contador de Conectados
+firebase.database().ref('conectados').on('value', (s) => {
+    const contenedor = document.getElementById('contador-online');
+    if (contenedor) contenedor.innerText = s.numChildren();
+});
+
+// 2. Traslado a Azkaban
+function trasladarAAzkaban() {
+    const uid = prompt("Ingresa el UID del alumno para enviar a Azkaban:");
+    if (!uid) return;
+    // Asigna el cromo 999 (Prisionero) y borra el resto
+    firebase.database().ref('usuarios/' + uid + '/cromos').set({ "999": true });
+    alert("Alumno trasladado a Azkaban.");
+}
+
+// 3. Exportar CSV
+function exportarCSV() {
+    firebase.database().ref('usuarios').once('value').then(s => {
+        let csv = "Nombre,Cromos\n";
+        s.forEach(u => {
+            const data = u.val();
+            csv += `${data.nombre || 'Anon'},"${Object.keys(data.cromos||{}).join(";")}"\n`;
+        });
+        const a = document.createElement("a");
+        a.href = "data:text/csv," + encodeURIComponent(csv);
+        a.download = "reporte_hogwarts.csv";
+        a.click();
+    });
+}
+ <div style="background:#222; color:#00ff00; padding:10px; margin-bottom:10px; border-radius:4px; text-align:center;">
+    🟢 Alumnos Conectados: <span id="contador-online">0</span>
+</div>
+     <button onclick="trasladarAAzkaban()" style="background:#8a6893; color:white; width:100%; padding:8px; margin-top:5px;">🔒 Trasladar a Azkaban</button>
+<button onclick="exportarCSV()" style="background:#27ae60; color:white; width:100%; padding:8px; margin-top:5px;">📥 Descargar Reporte CSV</button>
+    
 </script>
 
 <style>
