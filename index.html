@@ -2,321 +2,76 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Academia de Duelos - V24 ELITE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Álbum Digital Hogwarts Orión</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Special+Elite&display=swap');
-        :root { --gold: #d4af37; --red: #ff4d4d; --green: #2ecc71; --blue: #3498db; --purple: #9b59b6; }
-        body { background: #000; color: #f4e4bc; font-family: 'Special Elite', cursive; margin: 0; padding: 10px; box-sizing: border-box; }
-        .arena-container { background: radial-gradient(circle, #120f0a 0%, #000 100%); width: 100%; max-width: 100%; padding: 15px; border: 2px solid var(--gold); border-radius: 10px; text-align: center; box-sizing: border-box; }
-        .stats-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; background: rgba(20, 15, 10, 0.95); padding: 10px; border: 1px solid #444; margin-bottom: 10px; font-family: 'Cinzel'; font-size: 11px; border-radius: 5px; }
-        .btn { background: #1a1510; color: var(--gold); border: 1px solid #5c4021; padding: 15px 5px; cursor: pointer; font-family: 'Cinzel'; border-radius: 5px; font-size: 12px; width: 100%; touch-action: manipulation; }
-        .btn:active { background: var(--gold); color: #000; }
-        .hp-bar { background: #111; height: 25px; border: 1px solid var(--gold); border-radius: 5px; overflow: hidden; position: relative; margin: 5px 0; }
-        .hp-fill { height: 100%; transition: width 0.8s ease; width: 100%; }
-        #hp-mi-fill { background: linear-gradient(90deg, #145a32, var(--green)); }
-        #hp-en-fill { background: linear-gradient(90deg, #7b241c, var(--red)); }
-        .hp-text { position: absolute; width: 100%; text-align: center; color: white; font-family: 'Cinzel'; font-size: 12px; line-height: 25px; }
-        .screen { display: none; } .active { display: block; }
-        .panel { background: rgba(0,0,0,0.9); border: 1px solid #333; padding: 10px; border-radius: 5px; height: 300px; overflow-y: auto; text-align: left; margin-bottom: 10px; }
-        .spell-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 10px; max-height: 250px; overflow-y: auto; }
-        #log { height: 80px; overflow-y: auto; font-size: 10px; background: #000; padding: 5px; border: 1px solid #222; margin-top: 5px; }
-        input { padding: 12px; width: 90%; margin: 5px; background: #000; color: white; border: 1px solid var(--gold); font-size: 16px; }
-        .shake { animation: shake 0.4s; }
-        @keyframes shake { 0% { transform: translate(2px, 2px); } 20% { transform: translate(-4px, -2px); } 100% { transform: translate(0,0); } }
+        /* Estilos optimizados y centralizados */
+        body{background-color:#1e122b;margin:0;padding:20px;font-family:'Segoe UI',sans-serif;display:flex;flex-direction:column;align-items:center;}
+        .container{width:100%;max-width:650px;background:#f3ebf7;border:4px solid #4a154b;border-radius:16px;overflow:hidden;box-shadow:0 12px 24px rgba(0,0,0,0.5);}
+        .admin-panel{background:#222;border:3px solid #ff3333;border-radius:12px;padding:15px;color:white;margin-top:30px;width:100%;max-width:650px;}
+        .btn-admin{background:#4a154b;color:white;border:1px solid #ffcc00;padding:8px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:bold;width:100%;}
     </style>
 </head>
 <body>
 
-<div class="arena-container" id="arena">
-    <h2 style="font-family:'Cinzel'; color:var(--gold); margin:5px; font-size: 18px;">LEGADO DE HECHICEROS</h2>
-    <div id="spell-alert" style="position:fixed; top:30%; left:50%; transform:translateX(-50%); z-index:9999; display:none; pointer-events:none; font-family:'Cinzel'; font-size:24px; text-shadow:2px 2px 5px #000;"></div>
-
-    <div id="p-registro" class="screen">
-        <h3 style="font-family:'Cinzel'">REGISTRO</h3>
-        <input type="text" id="reg-nombre" placeholder="Nombre">
-        <input type="password" id="reg-pass" placeholder="Contraseña">
-        <br><button class="btn" style="width:80%; margin-top:10px;" onclick="iniciarSesion()">ENTRAR</button>
+<div class="container">
+    <div id="panel-director-root" style="padding:10px; background:#000; color:#fff; text-align:center;">
+        🟢 Alumnos Conectados: <span id="contador-online">0</span>
+    </div>
     </div>
 
-    <div id="p-lobby" class="screen">
-        <div class="stats-bar">
-            <span>🧙‍♂️ <b id="saludo"></b></span>
-            <span>🏆 <b id="stat-liga" style="color:var(--blue)"></b></span>
-            <span>LVL: <b id="stat-lvl"></b></span>
-            <span>HP: <b id="stat-hp" style="color:var(--green)"></b></span>
-        </div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-            <button class="btn" onclick="buscarDuelo('ranked')" style="border-color:cyan;">⚔️ RANKED</button>
-            <button class="btn" onclick="buscarDuelo('amistoso')" style="border-color:var(--purple);">🤝 AMISTOSO</button>
-            <button class="btn" onclick="dueloBot()">📖 ENTRENAR BOT</button>
-            <button class="btn" onclick="verRangos()">📜 RANGOS</button>
-            <button class="btn" onclick="cerrarSesion()" style="grid-column: span 2; margin-top:5px; opacity:0.7;">🚪 CERRAR SESIÓN</button>
-        </div>
-        <div class="panel" style="margin-top:10px; height: 250px;">
-            <h4 style="text-align:center; color:var(--gold); margin:5px;">GRIMORIO TOTAL</h4>
-            <div id="grimorio-lista"></div>
-        </div>
-    </div>
-
-    <div id="p-rangos" class="screen panel" style="position:fixed; width:90%; left:5%; top:5%; height:90%; z-index:1000; box-sizing:border-box;">
-        <h3 style="text-align:center; color:var(--gold); font-family:'Cinzel';">JERARQUÍA</h3>
-        <div id="lista-rangos-completa"></div>
-        <button class="btn" onclick="cambiarPantalla('lobby')" style="margin-top:15px;">VOLVER</button>
-    </div>
-
-    <div id="p-duelo" class="screen">
-        <div class="stats-bar">
-            <span id="mi-nombre-display"></span>
-            <span id="turno-txt" style="background:var(--gold); color:black; font-weight:bold; padding: 0 5px;">...</span>
-            <span id="en-nombre-display"></span>
-        </div>
-        <div class="hp-bar"><div id="hp-en-fill" class="hp-fill"></div><div id="hp-en-text" class="hp-text"></div></div>
-        <div class="hp-bar"><div id="hp-mi-fill" class="hp-fill"></div><div id="hp-mi-text" class="hp-text"></div></div>
-        <div id="spell-menu" class="spell-grid"></div>
-        <div id="log"></div>
+<div class="admin-panel" id="admin-controls">
+    <h3 style="color:#ff3333;">🛠 PANEL MAESTRO</h3>
+    <input type="password" id="admin-pass" placeholder="Clave de Director..." style="width:100%; padding:5px; margin-bottom:10px;">
+    
+    <div id="admin-actions" style="display:none;">
+        <button class="btn-admin" onclick="exportarCSV()">📥 Descargar Reporte (CSV)</button>
+        <button class="btn-admin" onclick="trasladarAAzkaban()" style="background:#8a6893; margin-top:5px;">🔒 Trasladar a Azkaban</button>
+        <button class="btn-admin" onclick="activarLluviaSobres()" style="background:#27ae60; margin-top:5px;">⚡ Lluvia de Sobres</button>
     </div>
 </div>
 
 <script>
-    const DB_BASE = "https://duelos-af899-default-rtdb.firebaseio.com";
+    // --- LÓGICA OPTIMIZADA ---
+    const ADMIN_PASS = "TU_CONTRASEÑA"; 
     
-    const LIGAS = [
-        { n: "Novato de la Torre", min: 1 }, { n: "Iniciado del Cáliz", min: 10 },
-        { n: "Aprendiz de Varita", min: 25 }, { n: "Duelista Errante", min: 45 },
-        { n: "Guardián de Arcanos", min: 70 }, { n: "Ejecutor de Sombras", min: 100 },
-        { n: "Maestro de Hechizos", min: 140 }, { n: "Archimago del Consejo", min: 190 },
-        { n: "Señor de la Magia", min: 250 }, { n: "Hechicero Supremo", min: 350 }
-    ];
-
-    const HECHIZOS = [
-        { n: "Expelliarmus", lvl: 1, d: 80 }, { n: "Incendio", lvl: 5, d: 150 }, { n: "Depulso", lvl: 10, d: 250 },
-        { n: "Offensio", lvl: 15, d: 380 }, { n: "Furnunculus", lvl: 20, d: 500 }, { n: "Oppugno", lvl: 30, d: 700 },
-        { n: "Densaugeo", lvl: 40, d: 950 }, { n: "Desmaius", lvl: 55, d: 1300 }, { n: "Penetro", lvl: 70, d: 1800 },
-        { n: "Rictusempra", lvl: 85, d: 2400 }, { n: "Flipendo", lvl: 100, d: 3200 }, { n: "Immobulus", lvl: 115, d: 4100 },
-        { n: "Diffindo", lvl: 130, d: 5200 }, { n: "Impedimenta", lvl: 145, d: 6500 }, { n: "Melofors", lvl: 160, d: 8000 },
-        { n: "Ebublio", lvl: 175, d: 10000 }, { n: "Gladii Pluvia", lvl: 190, d: 13000 }, { n: "Everte Statum", lvl: 210, d: 17000 },
-        { n: "Relaskio", lvl: 230, d: 22000 }, { n: "Jinx", lvl: 250, d: 28000 },
-        { n: "Petrificus Totalus", lvl: 270, d: 35000 }, { n: "Bombarda", lvl: 290, d: 43000 }, { n: "Incarcerous", lvl: 310, d: 52000 },
-        { n: "Meteolojinx", lvl: 330, d: 65000 }, { n: "Slugulus Eructo", lvl: 350, d: 80000 }, { n: "Mimblewimble", lvl: 370, d: 100000 },
-        { n: "Cacaetum Aria", lvl: 385, d: 115000 }, { n: "Confundus", lvl: 400, d: 130000 }, { n: "Geo Terrum", lvl: 415, d: 150000 },
-        { n: "Lacarnum Inflamari", lvl: 430, d: 180000 }, { n: "Tarantallegra", lvl: 450, d: 220000 },
-        { n: "Sectumsempra", lvl: 470, d: 400000, c:1 }, { n: "Confringo", lvl: 500, d: 600000, c:1 },
-        { n: "Imperio", lvl: 530, d: 900000, c:1 }, { n: "Crucio", lvl: 560, d: 1500000, c:1 },
-        { n: "Avada Kedavra", lvl: 600, d: 9999999, c:1 }
-    ];
-
-    let user, salaId, miRol, loop, miTurno = false, esBot = false, botHP = 0, miHPBot = 0, botMaxHP = 0, esAmistoso = false;
-
-    function sonar(f, t) {
-        try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const o = ctx.createOscillator(); const g = ctx.createGain();
-            o.type = t; o.frequency.setValueAtTime(f, ctx.currentTime);
-            o.connect(g); g.connect(ctx.destination);
-            g.gain.setValueAtTime(0.05, ctx.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-            o.start(); o.stop(ctx.currentTime + 0.3);
-        } catch(e){}
-    }
-
-    async function iniciarSesion() {
-        const nom = document.getElementById('reg-nombre').value.trim().toLowerCase();
-        const pass = document.getElementById('reg-pass').value;
-        if(!nom) return;
-        const res = await fetch(`${DB_BASE}/usuarios/${nom}.json`);
-        const d = await res.json();
-        if(d && d.pass === pass) user = d;
-        else if(!d) {
-            user = { nombre: nom, pass, lvl: 1, xp: 0, hpMax: 2000, liga: "Novato de la Torre" };
-            await fetch(`${DB_BASE}/usuarios/${nom}.json`, { method: 'PUT', body: JSON.stringify(user) });
-        } else return alert("Error");
-        localStorage.setItem('mago_sesion', nom);
-        initAcademia();
-    }
-
-    function initAcademia() {
-        user.liga = LIGAS.slice().reverse().find(l => user.lvl >= l.min).n;
-        cambiarPantalla('lobby');
-        document.getElementById('saludo').innerText = user.nombre.toUpperCase();
-        document.getElementById('stat-lvl').innerText = user.lvl;
-        document.getElementById('stat-hp').innerText = user.hpMax;
-        document.getElementById('stat-liga').innerText = user.liga;
-        
-        const grim = document.getElementById('grimorio-lista'); grim.innerHTML = "";
-        HECHIZOS.forEach(h => {
-            const ok = h.lvl <= user.lvl;
-            grim.innerHTML += `<div style="color:${ok?'var(--green)':'#555'}; font-size:12px; padding:2px; border-bottom:1px solid #111;">
-                ${ok?'✅':'🔒'} <b>${h.n}</b> <span style="float:right">Lvl ${h.lvl}</span>
-            </div>`;
+    // 1. Monitorización de Conectados (Integrada con Firebase)
+    function iniciarMonitoreo() {
+        firebase.database().ref('conectados').on('value', (s) => {
+            document.getElementById('contador-online').innerText = s.numChildren();
         });
     }
 
-    function verRangos() {
-        const l = document.getElementById('lista-rangos-completa'); l.innerHTML = "";
-        LIGAS.forEach(r => {
-            l.innerHTML += `<div style="padding:10px; border-bottom:1px solid #222; color:${user.liga===r.n?'var(--gold)':'white'}">
-                <b>${r.n}</b> <br> <small>Desde Nivel ${r.min}</small>
-            </div>`;
-        });
-        cambiarPantalla('rangos');
-    }
-
-    async function buscarDuelo(tipo) {
-        esBot = false; 
-        esAmistoso = (tipo === 'amistoso');
-        cambiarPantalla('duelo');
-        const lobbyKey = esAmistoso ? 'lobby_amistoso' : `lobby_${user.liga.replace(/ /g, '_')}`;
-        const res = await fetch(`${DB_BASE}/${lobbyKey}.json`);
-        const lobby = await res.json();
-        
-        if(lobby && lobby.uid !== user.nombre) {
-            salaId = lobby.salaId; miRol = "p2";
-            await fetch(`${DB_BASE}/${lobbyKey}.json`, { method: 'DELETE' });
-            await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ p2_n: user.nombre, p2_hp: user.hpMax, p2_m: user.hpMax, status: "jugando", turno: "p1" })});
+    // 2. Seguridad
+    function verificarAcceso() {
+        const pass = document.getElementById('admin-pass').value;
+        if(pass === ADMIN_PASS) {
+            document.getElementById('admin-actions').style.display = 'block';
         } else {
-            salaId = "sala_" + Date.now(); miRol = "p1";
-            await fetch(`${DB_BASE}/${lobbyKey}.json`, { method: 'PUT', body: JSON.stringify({ salaId, uid: user.nombre }) });
-            await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PUT', body: JSON.stringify({ p1_n: user.nombre, p1_hp: user.hpMax, p1_m: user.hpMax, p2_n: "Buscando...", p2_hp: 0, p2_m: 0, status: "esperando", turno: "none", last_spell: "" })});
-        }
-        empezarLoopDuelo();
-    }
-
-    function empezarLoopDuelo() {
-        const m = document.getElementById('spell-menu'); m.innerHTML = "";
-        HECHIZOS.filter(h => h.lvl <= user.lvl).reverse().forEach(h => {
-            m.innerHTML += `<button class="btn" style="${h.c?'border-color:var(--purple)':''}" onclick="atacar('${h.n}', ${h.d})">${h.n.toUpperCase()}</button>`;
-        });
-        loop = setInterval(async () => {
-            if(esBot) return;
-            const r = await fetch(`${DB_BASE}/salas/${salaId}.json`);
-            const d = await r.json(); if(!d) return;
-            if(d.status === "jugando") {
-                const miHP = miRol === 'p1' ? d.p1_hp : d.p2_hp;
-                const enHP = miRol === 'p1' ? d.p2_hp : d.p1_hp;
-                const miM = miRol === 'p1' ? d.p1_m : d.p2_m;
-                const enM = miRol === 'p1' ? d.p2_m : d.p1_m;
-                document.getElementById('hp-mi-fill').style.width = (miHP/miM*100) + "%";
-                document.getElementById('hp-en-fill').style.width = (enHP/enM*100) + "%";
-                document.getElementById('hp-mi-text').innerText = `${Math.floor(miHP)}`;
-                document.getElementById('hp-en-text').innerText = `${Math.floor(enHP)}`;
-                document.getElementById('en-nombre-display').innerText = miRol==='p1'?d.p2_n:d.p1_n;
-                document.getElementById('mi-nombre-display').innerText = user.nombre;
-                if(d.last_spell && d.last_spell.split(':')[0] !== user.nombre) {
-                    let p = d.last_spell.split(':'); efectoImpacto(p[1], p[2], p[3]);
-                }
-                miTurno = (d.turno === miRol);
-                document.getElementById('turno-txt').innerText = miTurno ? "TU TURNO" : "RIVAL...";
-                m.style.opacity = miTurno ? "1" : "0.3";
-                if(miHP <= 0) fin(false); if(enHP <= 0 && d.p2_n !== "Buscando...") fin(true);
-            }
-        }, 1200);
-    }
-
-    async function atacar(n, db) {
-        if(!miTurno) return; miTurno = false;
-        document.getElementById('spell-menu').style.opacity = "0.3";
-        let s = Math.random();
-        let fd = 0, msg = "";
-        
-        if(s < 0.12) { fd = 0; msg = "MISS"; sonar(150,'sine'); }
-        else {
-            let mult = Math.random() * (1.2 - 0.8) + 0.8;
-            fd = Math.floor((db + (user.lvl * 20)) * mult); // Daño equilibrado
-            if(s > 0.90) { fd = Math.floor(fd * 1.5); msg = "CRÍTICO"; sonar(800,'sawtooth'); }
-            else { msg = "HIT"; sonar(400,'triangle'); }
-        }
-
-        if(esBot) {
-            botHP -= fd; efectoImpacto(n, fd, msg); actualizarBarrasBot();
-            if(botHP <= 0) return fin(true);
-            
-            document.getElementById('turno-txt').innerText = "BOT PENSANDO...";
-            setTimeout(() => {
-                let botLuck = Math.random();
-                let dmgBot = 0; let botMsg = "HIT";
-
-                // BALANCEO PROPORCIONAL: El bot quita entre 12% y 18% de TU vida máxima.
-                // Esto escala automáticamente si tienes 220 o 200,000 de vida.
-                let basePorcentaje = (Math.random() * (0.18 - 0.12) + 0.12);
-                dmgBot = Math.floor(user.hpMax * basePorcentaje);
-
-                if(botLuck > 0.90) { dmgBot = Math.floor(dmgBot * 1.5); botMsg = "CRÍTICO BOT"; }
-                if(botLuck < 0.10) { dmgBot = 0; botMsg = "BOT MISS"; }
-                
-                miHPBot -= dmgBot;
-                efectoImpacto("Hechizo Rival", dmgBot, botMsg); actualizarBarrasBot();
-                if(miHPBot <= 0) fin(false);
-                else {
-                    miTurno = true;
-                    document.getElementById('turno-txt').innerText = "TU TURNO";
-                    document.getElementById('spell-menu').style.opacity = "1";
-                }
-            }, 1100);
-        } else {
-            const r = await fetch(`${DB_BASE}/salas/${salaId}.json`); const d = await r.json();
-            const target = miRol === 'p1' ? 'p2_hp' : 'p1_hp';
-            await fetch(`${DB_BASE}/salas/${salaId}.json`, { method: 'PATCH', body: JSON.stringify({ 
-                [target]: Math.max(0, (miRol==='p1'?d.p2_hp:d.p1_hp) - fd), 
-                turno: miRol==='p1'?'p2':'p1', last_spell: user.nombre+":"+n+":"+fd+":"+msg+":"+Date.now()
-            })});
+            alert("Acceso denegado");
         }
     }
 
-    function efectoImpacto(h, d, m) {
-        document.getElementById('arena').classList.add('shake'); sonar(100,'square');
-        const a = document.getElementById('spell-alert');
-        a.innerHTML = `<b style="color:var(--red)">${m} -${d}</b>`; a.style.display = 'block';
-        setTimeout(() => { document.getElementById('arena').classList.remove('shake'); a.style.display='none'; }, 800);
+    // 3. Azkaban (Limpia inventario, asigna cromo 999)
+    function trasladarAAzkaban() {
+        const uid = prompt("UID del alumno:");
+        if(uid) firebase.database().ref('usuarios/'+uid+'/cromos').set({"999": true});
     }
 
-    function dueloBot() {
-        esBot = true; miRol = "p1"; miTurno = true;
-        // El Bot tiene un 25% más de vida que tú para ser un jefe, pero no imposible.
-        botMaxHP = Math.floor(user.hpMax * 1.25); 
-        botHP = botMaxHP;
-        miHPBot = user.hpMax;
-        cambiarPantalla('duelo');
-        document.getElementById('mi-nombre-display').innerText = user.nombre;
-        document.getElementById('en-nombre-display').innerText = "BOT MAESTRO";
-        document.getElementById('turno-txt').innerText = "TU TURNO";
-        actualizarBarrasBot(); 
-        const m = document.getElementById('spell-menu'); m.innerHTML = "";
-        m.style.opacity = "1";
-        HECHIZOS.filter(h => h.lvl <= user.lvl).reverse().forEach(h => {
-            m.innerHTML += `<button class="btn" style="${h.c?'border-color:var(--purple)':''}" onclick="atacar('${h.n}', ${h.d})">${h.n.toUpperCase()}</button>`;
+    // 4. Reporte CSV
+    function exportarCSV() {
+        firebase.database().ref('usuarios').once('value').then(s => {
+            let csv = "Nombre,Cromos\n";
+            s.forEach(u => csv += `${u.val().nombre},"${Object.keys(u.val().cromos||{}).join(";")}"\n`);
+            const blob = new Blob([csv], {type: 'text/csv'});
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url; a.download = "reporte.csv"; a.click();
         });
     }
 
-    function actualizarBarrasBot() {
-        document.getElementById('hp-mi-fill').style.width = (miHPBot/user.hpMax*100) + "%";
-        document.getElementById('hp-en-fill').style.width = (botHP/botMaxHP*100) + "%";
-        document.getElementById('hp-mi-text').innerText = `${Math.floor(miHPBot)} / ${user.hpMax}`;
-        document.getElementById('hp-en-text').innerText = `${Math.floor(botHP)} / ${botMaxHP}`;
-    }
-
-    async function fin(win) {
-        clearInterval(loop); alert(win ? "¡VICTORIA!" : "DERROTA");
-        let xpGanada = win ? 1000 : 200;
-        if(esAmistoso) xpGanada /= 2;
-        user.xp += xpGanada;
-        while(user.xp >= (user.lvl * 1500)) { 
-            user.xp -= (user.lvl * 1500); user.lvl++; user.hpMax += 800; 
-        }
-        await fetch(`${DB_BASE}/usuarios/${user.nombre}.json`, { method: 'PUT', body: JSON.stringify(user) });
-        location.reload();
-    }
-
-    function cambiarPantalla(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('p-'+id).classList.add('active'); }
-    function cerrarSesion() { localStorage.removeItem('mago_sesion'); location.reload(); }
-
-    (async () => {
-        const s = localStorage.getItem('mago_sesion');
-        if(s) {
-            const r = await fetch(`${DB_BASE}/usuarios/${s}.json`);
-            user = await r.json(); if(user) initAcademia(); else cambiarPantalla('registro');
-        } else cambiarPantalla('registro');
-    })();
+    // Inicialización
+    iniciarMonitoreo();
 </script>
 </body>
 </html>
