@@ -518,7 +518,11 @@ function rastrearEstadoCodigo() {
         cajaResultado.innerHTML = "<span style='color: #ff3333;'>Error al conectar con los servidores.</span>";
     });
 }
-    function generar50CodigosOrion() {
+    /* ==========================================================================
+   HOGWARTS ORIÓN - TERCER PARTE
+   ========================================================================== */
+
+function generar50CodigosOrion() {
     const listaTextArea = document.getElementById('lista-codigos-generados');
     const btnCopiar = document.getElementById('btn-copiar-codigos');
     const aviso = document.getElementById('aviso-copiado');
@@ -897,30 +901,14 @@ function comprarSobreConEsencia() {
     
     fetch(fbDatabaseURL + "esencias/" + miIdAlbum + ".json", { method: 'PUT', body: JSON.stringify(esenciasMagicas) });
     procesarDificultadSobre();
-}
-    function reclamarPremioFlash() {
-    fetch(fbDatabaseURL + "evento_flash_activo.json")
-    .then(r => r.json())
-    .then(evt => {
-        if (!evt || evt.activo !== true) { 
-            alert("El evento flash ya ha finalizado."); 
-            return; 
-        }
-        fetch(fbDatabaseURL + "usuarios/" + miIdAlbum + "/reclamos_flash/" + evt.expira + ".json")
-        .then(r => r.json())
-        .then(yaReclamo => {
-            if (yaReclamo) { 
-                alert("Ya reclamaste este cofre flash."); 
-                return; 
-            }
-            fetch(fbDatabaseURL + "usuarios/" + miIdAlbum + "/reclamos_flash/" + evt.expira + ".json", { method: 'PUT', body: 'true' })
-            .then(() => {
-                alert("🎁 ¡Cofre Flash Abierto con éxito!"); 
-                procesarDificultadSobre();
             });
         });
     });
 }
+
+/* ==========================================================================
+   HOGWARTS ORIÓN - CUARTA PARTE Y CIERRE
+   ========================================================================== */
 
 function canjearCodigoSobreOnline() {
     const inputCod = document.getElementById('codigo-sobre-input');
@@ -1254,10 +1242,13 @@ function cargarCromosDinamicosDesdeNube() {
                     
                     if (!document.getElementById('slot-' + id)) {
                         const htmlSlot = crearHtmlCardSlot(id, data[id].nombre);
-                        const casaGrid = document.getElementById('grid-casa-' + data[id].seccion.toLowerCase());
+                        
+                        // Mapeo automático de sección (incluyendo Azkaban)
+                        let seccionLcase = data[id].seccion.toLowerCase();
+                        const casaGrid = document.getElementById('grid-casa-' + seccionLcase);
                         
                         if (casaGrid) { 
-                            removerTextoVacio('grid-casa-' + data[id].seccion.toLowerCase()); 
+                            removerTextoVacio('grid-casa-' + seccionLcase); 
                             casaGrid.insertAdjacentHTML('beforeend', htmlSlot); 
                         } else { 
                             const gridEsp = document.getElementById('grid-especiales-101');
