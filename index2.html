@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hogwarts Orión - Álbum Interactivo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Special+Elite&display=swap" rel="stylesheet">
+</head>
+<body style="background-color: #120c1a; margin: 0; padding: 20px; font-family: 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; color: #eee;">
+
+<!-- VENTANA USUARIOS ONLINE (NUEVO) -->
+<div id="status-online" style="position: fixed; bottom: 10px; left: 10px; background: rgba(20, 20, 30, 0.9); border: 2px solid #4a154b; border-radius: 10px; padding: 10px; z-index: 1000; font-size: 11px; box-shadow: 0 0 15px #4a154b;">
+    <div style="color: #00ffcc; font-weight: bold; margin-bottom: 5px;">🔮 Orbe de Visión (Online)</div>
+    <div id="lista-online" style="max-height: 100px; overflow-y: auto; color: #ccc;">Cargando...</div>
+</div>
+
+<!-- MODAL DE HISTORIA (NUEVO) -->
+<div id="modal-historia" onclick="this.style.display='none'" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
+    <div style="background: #f4e4bc; color: #2c1a05; padding: 30px; border-radius: 5px; max-width: 400px; position: relative; border: 10px double #5d4037; box-shadow: 0 0 50px rgba(0,0,0,0.5); font-family: 'Special Elite', cursive;">
+        <div id="titulo-historia" style="font-size: 20px; font-weight: bold; border-bottom: 2px solid #5d4037; margin-bottom: 15px; text-align: center;"></div>
+        <div id="texto-historia" style="font-size: 14px; line-height: 1.5; text-align: justify;"></div>
+        <div style="margin-top: 20px; text-align: center; font-size: 12px; font-weight: bold;">(Clic para cerrar el pergamino)</div>
+    </div>
+</div>
+
+<div style="width: 100%; max-width: 650px; background-color: #f3ebf7; background-image: radial-gradient(#e1cee9 1px, transparent 1px); background-size: 20px 20px; border: 4px solid #4a154b; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 24px rgba(0,0,0,0.5); box-sizing: border-box; color: #333;">
+  
+  <div style="background: linear-gradient(135deg, #4a154b, #2c0c2e); padding: 20px; color: white; text-align: center; border-bottom: 4px solid #ffcc00;">
+    <b style="font-size: 26px; font-family: 'Cinzel', serif;">HOGWARTS ORIÓN</b>
+    <div style="font-size: 10px; color: #ffcc00; letter-spacing: 2px;">SISTEMA INTERACTIVO DE COLECCIONISTAS</div>
+  </div>
+
+  <!-- PANEL ALUMNO -->
+  <div id="seccion-login-alumno" style="padding: 20px; text-align: center; background: white;">
+    <input type="text" id="nombre-alumno-input" placeholder="Tu nombre de personaje..." style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+    <button onclick="identificarAlumno()" style="background: #4a154b; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 5px;">Entrar al Álbum</button>
+  </div>
+
+  <div id="panel-alumno-activo" style="display: none; padding: 15px; background: rgba(255,255,255,0.9); border-bottom: 2px solid #4a154b;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+          <b>🧙‍♂️ <span id="nombre-perfil-txt"></span></b>
+          <span>✨ <b id="polvo-esencia-txt">0</b></span>
+          <button onclick="cerrarSesion()" style="color: red; background: none; border: none; cursor: pointer; font-size: 10px;">SALIR</button>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+          <input type="text" id="codigo-sobre-input" placeholder="CÓDIGO DE SOBRE" style="padding: 5px; text-transform: uppercase;">
+          <button onclick="canjearCodigoSobreOnline()" style="background: #e67e22; color: white; border: none; cursor: pointer;">Abrir Sobre ✨</button>
+      </div>
+      <div id="resultado-sobre" style="display: none; margin-top: 10px; background: #333; color: #ffcc00; padding: 10px; font-size: 11px; text-align: center; border-radius: 5px;"></div>
+  </div>
+
+  <!-- SECCIONES DE CASAS -->
+  <div id="wrapper-especiales" style="background: #4a154b; color: white; padding: 10px; text-align: center; font-weight: bold;">⭐ CROMOS HISTÓRICOS (1-101)</div>
+  <div id="grid-especiales-101" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; background: #eee;"></div>
+
+  <div id="wrapper-criaturas" style="background: #1b5e20; color: white; padding: 10px; text-align: center; font-weight: bold;">🐉 CRIATURAS Y SERES (102-126)</div>
+  <div id="grid-criaturas" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; background: #e8f5e9;"></div>
+
+  <!-- SECCIONES DE ALUMNOS DINÁMICOS -->
+  <div id="contenedor-secciones-dinamicas"></div>
+
+  <!-- SECCIÓN AZKABAN (PRISIONEROS) -->
+  <div id="wrapper-azkaban" style="background: linear-gradient(to bottom, #1a1a1a, #2c3e50); color: #bdc3c7; padding: 15px; border-top: 5px solid #000; border-bottom: 5px solid #000; position: relative; overflow: hidden;">
+    <div style="font-family: 'Cinzel', serif; font-size: 20px; text-align: center; letter-spacing: 5px; color: #e74c3c; text-shadow: 0 0 10px red;">⛓️ PRISIONEROS DE AZKABAN ⛓️</div>
+    <div style="font-size: 9px; text-align: center; color: #7f8c8d; margin-bottom: 10px;">EXPULSADOS DE LA SOCIEDAD MÁGICA - SIN DERECHO A VARITA</div>
+    <div id="grid-casa-azkaban" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; justify-items: center; min-height: 40px; filter: grayscale(0.5) contrast(1.2);"></div>
+  </div>
+
+</div>
+
+<!-- PANEL DEL DIRECTOR -->
+<div style="width: 100%; max-width: 650px; margin-top: 20px; background: #222; border: 3px solid #ff3333; padding: 15px; color: white; border-radius: 12px;">
+    <div style="color: #ff3333; font-weight: bold; margin-bottom: 10px;">🛠️ PANEL DEL DIRECTOR</div>
+    <input type="password" id="admin-pass" placeholder="Clave..." style="padding: 5px;">
+    <button onclick="verificarAdmin()" style="background: #ff3333; border: none; color: white; padding: 5px 10px; cursor: pointer;">Acceder</button>
+
+    <div id="admin-controls" style="display: none; margin-top: 15px; border-top: 1px solid #444; padding-top: 10px;">
+        <button onclick="exportarExcelProgreso()" style="width: 100%; background: #27ae60; color: white; padding: 10px; font-weight: bold; margin-bottom: 10px; cursor: pointer;">📊 DESCARGAR EXCEL DE PROGRESO (CSV)</button>
+        
+        <div style="background: #111; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+            <b style="color: #ffcc00; font-size: 12px;">🎨 CREAR NUEVA SECCIÓN</b><br>
+            <input type="text" id="nueva-sec-nombre" placeholder="Nombre (Ej: Mortífagos)" style="width: 90%; margin: 5px 0;">
+            <input type="text" id="nueva-sec-color" placeholder="Color fondo (Ej: #000)" style="width: 45%;">
+            <input type="text" id="nueva-sec-borde" placeholder="Color borde (Ej: red)" style="width: 45%;">
+            <button onclick="crearSeccionPersonalizada()" style="width: 100%; margin-top: 5px; background: #4a154b; color: white;">Crear Sección</button>
+        </div>
+
+        <button onclick="crearCodigoSobreEnFirebase()" style="width: 100%; background: #e67e22; color: white; padding: 8px; margin-bottom: 5px;">Generar Código de Sobre (1-126)</button>
+        <div id="contenedor-resultado" style="display:none; color: #ffcc00; font-family: monospace; text-align: center; border: 1px dashed #ffcc00; padding: 5px;"></div>
+    </div>
+</div>
+
+<script>
+const fbDatabaseURL = "https://album-75178-default-rtdb.firebaseio.com/";
+let miIdAlbum = "";
+let cromosPegadosIds = new Set();
+let esenciasMagicas = 0;
+
+// HISTORIAS Y LORE (EASTER EGGS)
+const loreCromos = {
+    "100": { t: "Harry Potter", h: "El niño que vivió. En Hogwarts Orión se le recuerda por haber donado su Saeta de Fuego a un alumno de primer año tras ganar el torneo intercasas de 2025." },
+    "101": { t: "Albus Dumbledore", h: "Su retrato en la oficina del Director suele dar pistas falsas a los alumnos que intentan copiar en Transformaciones. Le gustan los caramelos de limón." },
+    "201": { t: "Cris DelaCour (Slytherin)", h: "Expulsada tras descubrirse que intentó criar un Basilisco en las duchas de Slytherin. Su excusa fue que 'estaba sola y quería compañía'." },
+    "202": { t: "Fernando Greengrass (Slytherin)", h: "Suspendido por intentar vender pociones de amor falsas que en realidad hacían que a las personas les crecieran orejas de burro durante 48 horas." },
+    "203": { t: "Ana Black (Gryffindor)", h: "La oveja negra de los Black. Fue enviada a Azkaban por usar un hechizo de 'Expelliarmus' tan potente que lanzó al profesor de Vuelo hasta la torre de astronomía." },
+    "204": { t: "Gabo Sayre (Gryffindor)", h: "Leyenda del Quidditch que terminó en la prisión mágica tras ser atrapado saboteando las escobas de Ravenclaw con polvos pica-pica de Zonko." },
+    "205": { t: "Odette Salvatore (Slytherin)", h: "La alumna más brillante en Artes Oscuras. Se dice que susurró un hechizo prohibido al Sauce Boxeador y ahora el árbol solo ataca a los Hufflepuff." }
+};
+
+const infoCromos = {
+    "1": "Merlín", "100": "Harry Potter", "101": "Albus Dumbledore",
+    "201": "Cris DelaCour", "202": "Fernando Greengrass", "203": "Ana Black", "204": "Gabo Sayre", "205": "Odette Salvatore"
+};
+// Llenar nombres del 2 al 126 automáticamente para el ejemplo
+for(let i=2; i<=126; i++) { if(!infoCromos[i]) infoCromos[i] = "Mago Famoso #" + i; }
+
+window.onload = function() {
+    dibujarGridsBase();
+    cargarSeccionesExtra();
+    escucharOnline();
+    if(localStorage.getItem('orion_user_name_id')) {
+        miIdAlbum = localStorage.getItem('orion_user_name_id');
+        mostrarInterfazAlumnoActivo();
+    }
+};
+
+function dibujarGridsBase() {
+    const g101 = document.getElementById('grid-especiales-101');
+    const gCri = document.getElementById('grid-criaturas');
+    g101.innerHTML = ""; gCri.innerHTML = "";
+    
+    for(let i=1; i<=126; i++) {
+        let card = crearHtmlCard(i);
+        if(i <= 101) g101.insertAdjacentHTML('beforeend', card);
+        else gCri.insertAdjacentHTML('beforeend', card);
+    }
+}
+
+function crearHtmlCard(id) {
+    return `
+      <div id="slot-${id}" style="background:white; border:2px dashed #ccc; border-radius:8px; padding:5px; text-align:center; height:180px; position:relative;">
+        <div style="font-size:9px; position:absolute; top:2px; left:5px;">#${id}</div>
+        <div id="icon-${id}" style="font-size:30px; margin-top:30px;">?</div>
+        <div style="font-size:10px; font-weight:bold; margin-top:10px;">${infoCromos[id] || 'Cromo Especial'}</div>
+        <button id="btn-lore-${id}" onclick="verLore(${id})" style="display:none; width:100%; font-size:9px; background:#4a154b; color:white; border:none; margin-top:5px; cursor:pointer; border-radius:3px;">Ver Historia</button>
+      </div>`;
+}
+
+function verLore(id) {
+    const modal = document.getElementById('modal-historia');
+    const t = document.getElementById('titulo-historia');
+    const txt = document.getElementById('texto-historia');
+    
+    let lore = loreCromos[id] || { t: infoCromos[id], h: "Este cromo guarda secretos que aún no han sido revelados por el Ministerio de Magia." };
+    t.innerText = lore.t;
+    txt.innerText = lore.h;
+    modal.style.display = 'flex';
+}
+
+function identificarAlumno() {
+    let input = document.getElementById('nombre-alumno-input').value.trim();
+    if(input === "") return;
+    miIdAlbum = input.replace(/[\.\#\$\[\]]/g, "_");
+    localStorage.setItem('orion_user_name_id', miIdAlbum);
+    mostrarInterfazAlumnoActivo();
+}
+
+function mostrarInterfazAlumnoActivo() {
+    document.getElementById('seccion-login-alumno').style.display = 'none';
+    document.getElementById('panel-alumno-activo').style.display = 'block';
+    document.getElementById('nombre-perfil-txt').innerText = miIdAlbum;
+    
+    // Registrar online
+    fetch(fbDatabaseURL + "lista_alumnos_activos/" + miIdAlbum + ".json", { method: 'PUT', body: JSON.stringify({ ultima_vez: Date.now() }) });
+    cargarProgresoDesdeNube();
+}
+
+function cargarProgresoDesdeNube() {
+    fetch(fbDatabaseURL + "usuarios/" + miIdAlbum + ".json").then(res => res.json()).then(guardados => {
+        if(guardados) {
+            Object.keys(guardados).forEach(id => {
+                if(guardados[id] === true) aplicarPegadoVisual(id);
+            });
+        }
+    });
+}
+
+function aplicarPegadoVisual(id) {
+    cromosPegadosIds.add(id.toString());
+    const slot = document.getElementById('slot-' + id);
+    if(slot) {
+        slot.style.border = "2px solid #ffcc00";
+        slot.style.background = "#fff8e7";
+        document.getElementById('icon-' + id).innerText = "✅";
+        document.getElementById('btn-lore-' + id).style.display = "block";
+    }
+}
+
+// 🛍️ SOBRES LIMITADOS A 1-126
+function procesarDificultadSobre() {
+    let elegidos = [];
+    for(let i=0; i<3; i++) {
+        let id = Math.floor(Math.random() * 126) + 1; // Solo 1 a 126
+        elegidos.push(id);
+    }
+    
+    let promesas = elegidos.map(id => {
+        return fetch(fbDatabaseURL + "usuarios/" + miIdAlbum + "/" + id + ".json", { method: 'PUT', body: 'true' });
+    });
+
+    Promise.all(promesas).then(() => {
+        const resDiv = document.getElementById('resultado-sobre');
+        resDiv.style.display = 'block';
+        resDiv.innerText = "🎉 SOBRE ABIERTO: " + elegidos.join(", ");
+        elegidos.forEach(id => aplicarPegadoVisual(id));
+    });
+}
+
+function canjearCodigoSobreOnline() {
+    let cod = document.getElementById('codigo-sobre-input').value.trim().toUpperCase();
+    if(cod === "") return;
+    fetch(fbDatabaseURL + "codigos_sobres/" + cod + ".json").then(res => res.json()).then(data => {
+        if(!data || data.usado === true) { alert("Código inválido o ya usado."); return; }
+        fetch(fbDatabaseURL + "codigos_sobres/" + cod + "/usado.json", { method: 'PUT', body: 'true' }).then(() => {
+            document.getElementById('codigo-sobre-input').value = "";
+            procesarDificultadSobre();
+        });
+    });
+}
+
+// 📊 EXCEL EXPORT (CSV)
+function exportarExcelProgreso() {
+    fetch(fbDatabaseURL + "usuarios.json").then(res => res.json()).then(data => {
+        if(!data) return;
+        let csvContent = "data:text/csv;charset=utf-8,Alumno,Cantidad,Cromos Obtenidos\n";
+        
+        Object.keys(data).forEach(user => {
+            let ids = Object.keys(data[user]).filter(k => !isNaN(k) && data[user][k] === true);
+            csvContent += `${user},${ids.length},"${ids.join("-")}"\n`;
+        });
+
+        let encodedUri = encodeURI(csvContent);
+        let link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "Progreso_Hogwarts_Orion.csv");
+        document.body.appendChild(link);
+        link.click();
+    });
+}
+
+// 👥 USUARIOS ONLINE
+function escucharOnline() {
+    setInterval(() => {
+        fetch(fbDatabaseURL + "lista_alumnos_activos.json").then(res => res.json()).then(data => {
+            const list = document.getElementById('lista-online');
+            if(!data) { list.innerText = "No hay magos despiertos."; return; }
+            let html = "";
+            Object.keys(data).forEach(user => {
+                let diff = Date.now() - data[user].ultima_vez;
+                if(diff < 60000) html += `<div>🟢 ${user}</div>`;
+            });
+            list.innerHTML = html || "Todos duermen...";
+        });
+    }, 5000);
+}
+
+// 🛠️ ADMIN
+function verificarAdmin() {
+    if(document.getElementById('admin-pass').value === "orion2026") {
+        document.getElementById('admin-controls').style.display = 'block';
+    } else { alert("Error."); }
+}
+
+function crearCodigoSobreEnFirebase() {
+    let codigo = "SOBRE-" + Math.random().toString(36).substring(2, 7).toUpperCase();
+    fetch(fbDatabaseURL + "codigos_sobres/" + codigo + ".json", { method: 'PUT', body: JSON.stringify({ usado: false }) }).then(() => {
+        document.getElementById('contenedor-resultado').style.display = 'block';
+        document.getElementById('contenedor-resultado').innerText = "CÓDIGO: " + codigo;
+    });
+}
+
+function crearSeccionPersonalizada() {
+    let nom = document.getElementById('nueva-sec-nombre').value;
+    let col = document.getElementById('nueva-sec-color').value;
+    let bor = document.getElementById('nueva-sec-borde').value;
+    if(!nom) return;
+    
+    let secObj = { nombre: nom, color: col, borde: bor };
+    fetch(fbDatabaseURL + "secciones_extra.json", { method: 'POST', body: JSON.stringify(secObj) }).then(() => location.reload());
+}
+
+function cargarSeccionesExtra() {
+    // Primero Azkaban que es especial
+    const gridAzkaban = document.getElementById('grid-casa-azkaban');
+    [201, 202, 203, 204, 205].forEach(id => {
+        gridAzkaban.insertAdjacentHTML('beforeend', crearHtmlCard(id));
+    });
+
+    // Luego las creadas por el admin
+    fetch(fbDatabaseURL + "secciones_extra.json").then(res => res.json()).then(data => {
+        if(!data) return;
+        const cont = document.getElementById('contenedor-secciones-dinamicas');
+        Object.keys(data).forEach(key => {
+            let s = data[key];
+            let html = `
+                <div style="background:${s.color}; color:white; padding:10px; text-align:center; font-weight:bold; border-top:3px solid ${s.borde}">${s.nombre.toUpperCase()}</div>
+                <div id="grid-casa-${key}" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; padding:15px; background:rgba(255,255,255,0.1);">
+                    <p style="color:#666; grid-column: span 3; text-align:center; font-size:11px;">Sección vacía. Agrega cromos ID 200+ desde el panel.</p>
+                </div>`;
+            cont.insertAdjacentHTML('beforeend', html);
+        });
+    });
+}
+
+function cerrarSesion() {
+    localStorage.removeItem('orion_user_name_id');
+    location.reload();
+}
+</script>
+
+<style>
+    /* Estilo piedra Azkaban */
+    #wrapper-azkaban {
+        background-image: url('https://www.transparenttextures.com/patterns/dark-matter.png');
+    }
+    input { background: #eee; border: 1px solid #ccc; padding: 5px; }
+</style>
+</body>
+</html>
